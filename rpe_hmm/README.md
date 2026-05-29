@@ -1,197 +1,167 @@
-# RPE Analysis Integration Guide
+# RPE GLM-HMM Analysis
 
-This folder contains code to test whether **Reward Prediction Errors (RPEs)** drive motivational state transitions better than raw rewards, using the robust `ssm.HMM_TO` implementation from Mohammadi et al. (2025).
+This folder contains the current end-to-end script for testing whether reward prediction errors (RPEs) explain motivational state transitions better than raw reward history in the IBL GLM-HMM framework.
 
-## Core Hypothesis
+The current entry point is `run_rpe_hmm.py`.
 
-> RPE signals (not raw rewards) govern transitions between engaged and disengaged behavioral states in mice.
+## What the script does
 
-## The Models
+`run_rpe_hmm.py` runs a full pipeline that:
 
-All models share the same **observation model** (choice probability depends on stimulus contrast weighted by state-specific sensitivity), but differ in their **transition model** (what predicts state switches):
+1. loads preprocessed IBL mouse data,
+2. fits a Q-learning model per mouse,
+3. derives Q-based and belief-based RPE regressors,
+4. fits multiple GLM-HMM transition models using `ssm.HMM_TO`,
+5. compares held-out log-likelihood across models,
+6. fits full-session `M2-Q` models for state-sequence and transition-weight summaries,
+7. saves summary tables, figures, and JSON outputs.
 
-| Model | Transition Regressors | Description |
-|-------|----------------------|-------------|
-| **M0** | Constant (bias only) | Null model — state transitions happen at fixed background rate |
-| **M1** | Filtered reward, choice, stim_side (τ=4) | Raw reward history baseline (Mohammadi et al.) |
-| **M2-Q** | cumpos RPE, cumneg RPE, abs RPE, current RPE | Q-learning RPE-based transitions |
-| **M2-Belief** | Same as M2-Q but using belief-state RPE | Bayesian observer RPE-based transitions |
-| **M3-Q** | M1 + M2-Q combined | Combined raw reward + Q-learning RPE |
-| **M3-Belief** | M1 + M2-Belief combined | Combined raw reward + belief-state RPE |
+## Current model set
 
-### Model Nesting
+All models share the same observation model and differ only in the transition regressors.
 
-```
-M0  ⊂  M1  ⊂  M3
-               ↑
-M0  ⊂  M2  ⊂  M3
-```
+| Model | Transition regressors | Notes |
+|---|---|---|
+| `L0` | Training-set choice frequencies only | Current baseline used in code |
+| `M1` | Original preprocessed Mohammadi-style transition regressors | Raw reward / choice / stimulus history baseline |
+| `M2-Q` | Filtered positive RPE, filtered negative RPE, running absolute RPE, current RPE | Q-learning RPE model |
+| `M2-Belief` | Same structure as `M2-Q`, using belief-state RPEs | Bayesian belief learner variant |
+| `M3-Q` | `M1` + `M2-Q` | Combined raw history + Q-RPE |
+| `M3-Belief` | `M1` + `M2-Belief` | Combined raw history + belief-RPE |
 
-## The Analyses
+## Analyses currently produced
 
-### Analysis 1 — Model Comparison: Does RPE beat raw reward?
-- **Test**: Wilcoxon signed-rank on ΔLL(M2-Q − M1) across subjects
-- **Effect size**: Rank-biserial correlation
-- **CI**: Bootstrap 95% confidence interval on mean ΔLL
-- **Null check**: Permutation test with circular-shifted RPE sequences
+### 1. Model comparison: `M2-Q` vs `M1`
 
-### Analysis 1b — Belief-state vs Q-learning RPE
-- **Test**: Wilcoxon signed-rank on ΔLL(M2-Belief − M2-Q)
-- Tests whether brain computes RPE more like delta-rule or Bayesian inference
+- per-subject held-out $\Delta LL = LL(M2\text{-}Q) - LL(M1)$,
+- Wilcoxon signed-rank test,
+- rank-biserial effect size,
+- bootstrap confidence interval for the mean difference,
+- optional permutation null test.
 
-### Analysis 2 — Transition Weight Signatures
-- Extracts learned weights on each RPE regressor for:
-  - Engaged → Disengaged transitions
-  - Disengaged → Engaged transitions
-- **Statistic**: Bootstrap 95% CIs on mean weights (excludes zero?)
+### 1b. Model comparison: `M2-Belief` vs `M2-Q`
 
-### Analysis 3 — Individual Differences
-- **Test**: Spearman correlation between α⁺ (positive learning rate) and mean engaged-state dwell time
-- Tests whether faster learners have less stable engagement
+- per-subject held-out $\Delta LL = LL(M2\text{-}Belief) - LL(M2\text{-}Q)$,
+- Wilcoxon signed-rank test,
+- rank-biserial effect size,
+- bootstrap confidence interval.
 
-### Analysis 4 — Block Boundary Analysis
-- Peri-event analysis around contingency shifts (±20 trials)
-- **Test**: One-sample t-test on RPE at boundary vs 0
-- Descriptive: P(engaged) pre vs post boundary
+### 2. Transition-weight summary
 
-## Files
+Using full-session `M2-Q` fits, the script summarizes RPE-linked transition weights for:
 
-- `rpe_glmhmm_full_analysis.py` — Complete analysis script with all models and analyses
-- `rpe_glmhmm_analysis.py` — Simplified version (M1, M2-Q, M3-Q only)
-- `outputs/` — Results (CSVs, figures, JSON)
+- engaged $\rightarrow$ disengaged,
+- disengaged $\rightarrow$ engaged.
 
-## Prerequisites
+### 3. Individual-differences summary
 
-1. **Install the SSM fork** (required for `ssm.HMM_TO`):
-   ```bash
-   cd /home/khafez/janhaf2n
-   git clone https://github.com/Zeinab-Mohammadi/ssm.git
-   cd ssm
-   pip install numpy cython
-   pip install -e .
-   ```
+- Spearman correlation between `alpha_pos` and mean engaged-state dwell time.
 
-2. **Run data preprocessing** (if not done):
-   ```bash
-   cd /home/khafez/janhaf2n/glm-hmm-rpe/data/ibl
-   python make_animal_list_tables.py
-   python processed_data_input_matrices.py
-   ```
+### 4. Block-boundary summary
 
-## Running the Full Analysis
+- peri-boundary RPE average,
+- one-sample $t$-test of boundary RPE against $0$,
+- pre/post engaged-state occupancy around block switches.
+
+## Requirements
+
+### 1. SSM package
+
+The script imports `ssm.HMM_TO`. This repository already has an `ssm/` folder at the repo root, but it still needs to be installed into the active Python environment.
+
+Example:
 
 ```bash
-cd /home/khafez/janhaf2n/glm-hmm-rpe/rpe_analysis
-python rpe_glmhmm_full_analysis.py
+cd ssm
+pip install numpy cython
+pip install -e .
 ```
 
-### Quick Test (5 mice)
-Edit `rpe_glmhmm_full_analysis.py` line ~67:
+### 2. Preprocessed IBL data
+
+The script expects data under:
+
+- `data/ibl/Della_cluster_data/separate_mouse_data/`
+
+Required files include:
+
+- `mice_names.npz`
+- `*_processed.npz`
+- `*_rewarded.npz`
+- optionally `*_fold_session_map.npz`
+
+If these files are missing, run the IBL preprocessing pipeline first.
+
+## Running the analysis
+
+```bash
+python rpe_hmm/run_rpe_hmm.py
+```
+
+## Quick test mode
+
+For a short test run, edit `run_rpe_hmm.py` and set:
+
 ```python
-N_MICE = 5  # Set to None for all mice
+N_MICE = 5
 ```
 
-## Configuration Parameters
+Set it back to:
 
-Edit at the top of `rpe_glmhmm_full_analysis.py`:
+```python
+N_MICE = None
+```
+
+to analyze all mice.
+
+## Default configuration
 
 ```python
 # GLM-HMM settings
-N_STATES = 4                # Number of HMM states (K=4 per your spec)
-N_FOLDS = 5                 # Cross-validation folds
-N_EM_ITERS_CV = 50          # EM iterations for CV
-N_EM_ITERS_FULL = 100       # EM iterations for full fits
-PRIOR_SIGMA = 4.0           # Observation GLM prior
-TRANSITION_ALPHA = 2.0      # Transition prior (sticky)
+N_STATES = 4
+N_FOLDS = 5
+N_EM_ITERS_CV = 50
+N_EM_ITERS_FULL = 100
+PRIOR_SIGMA = 4.0
+TRANSITION_ALPHA = 2.0
 
-# Q-learning settings
-RL_N_RESTARTS = 8           # Multi-start optimization
-RL_BOUNDS = {
-    "alpha_pos": (1e-3, 0.999),
-    "alpha_neg": (1e-3, 0.999),
-    "beta": (0.1, 20.0),
-    "v0": (0.0, 1.0),
-}
+# RL settings
+RL_N_RESTARTS = 8
+RL_MAX_ITER = 500
 
-# Belief-state RL settings
-BELIEF_REWARD_PROBS = [0.2, 0.5, 0.8]  # Hidden reward states
-BELIEF_HAZARD = 0.02                    # Transition hazard
+# Belief model
+BELIEF_REWARD_PROBS = np.array([0.2, 0.5, 0.8], dtype=float)
+BELIEF_HAZARD = 0.02
 
 # RPE regressors
-RPE_WINDOW = 10             # Sliding window for cumulative RPE
-TAU_FILTER = 4.0            # Exponential filter (matches Mohammadi et al.)
+RPE_WINDOW = 10
+TAU_FILTER = 4.0
 
 # Statistics
-BOOTSTRAP_N = 200           # Bootstrap resamples
-N_PERMUTATIONS = 50         # Permutation test iterations
-NULL_MODE = "circular_shift"  # or "shuffle"
+BOOTSTRAP_N = 200
+N_PERMUTATIONS = 20
+NULL_MODE = "circular_shift"
 
-# Block boundary analysis
-BOUNDARY_WINDOW = 20        # Half-width of peri-boundary window
+# Block analysis
+BOUNDARY_WINDOW = 20
+
+# Scope / compute
+N_MICE = None
+N_WORKERS = mp.cpu_count() - 1
 ```
 
-## Outputs
+## Main outputs
 
-After running, you'll find in `outputs/`:
+After a run, the script typically writes:
 
 | File | Description |
-|------|-------------|
-| `summary.csv` | Per-subject mean LLs for all 6 models |
-| `results.json` | All statistical results (can recreate figures) |
-| `fig1_model_comparison.png` | Boxplot + ΔLL histogram |
-| `fig2_transition_weights.png` | RPE weight bar plots by direction |
-| `fig3_individual_differences.png` | α⁺ vs dwell time scatter |
-| `fig4_block_boundaries.png` | Peri-event RPE and engagement |
-
-## Understanding the Results
-
-### Analysis 1 Output
-```
-Mean ΔLL (M2-Q − M1): +0.0123 bits/trial
-95% Bootstrap CI: [+0.0045, +0.0201]
-Wilcoxon p=0.0032, rank-biserial r=+0.64
-Permutation p=0.0180
-Direction: RPE > Raw Reward
-```
-- **Positive ΔLL**: M2 (RPE) fits better than M1 (raw reward)
-- **p < 0.05**: Effect is statistically significant
-- **r > 0**: Consistent direction across subjects
-- **Perm p < 0.05**: Effect is due to temporal alignment, not spurious
-
-### Analysis 2 Output
-```
-Engaged → Disengaged:
-  cumneg: mean=-0.15, 95% CI [-0.22, -0.08], excludes 0: YES
-  cumpos: mean=+0.02, 95% CI [-0.05, +0.09], excludes 0: no
-```
-- **Excludes 0**: This regressor reliably predicts the transition
-- **Sign**: Negative cumneg → negative RPEs cause disengagement
-
-## Troubleshooting
-
-### "SSM package not found"
-```bash
-git clone https://github.com/Zeinab-Mohammadi/ssm.git
-pip install -e ./ssm
-```
-
-### "mice_names.npz not found"
-Run preprocessing first (see Prerequisites above).
-
-### Fits are slow
-- Reduce `N_EM_ITERS_CV` to 25
-- Reduce `N_STATES` to 3
-- Reduce `N_PERMUTATIONS` to 20
-- Set `N_MICE = 5` for testing
-
-### Memory errors
-The script processes mice one at a time, so memory should not be an issue.
-
-### "No block boundaries found"
-This happens if `left_probs` (probabilityLeft) isn't in the processed data. The block boundary analysis will be skipped but other analyses will run.
-
-## Citation
-
-If you use this analysis, cite:
-- Mohammadi et al. (2025) for the GLM-HMM framework and SSM package
-- Your work for the RPE hypothesis and Q-learning/belief-state integration
+|---|---|
+| `summary.csv` | Per-mouse summary of held-out log-likelihood and RL parameters |
+| `results.json` | Main analysis results bundle |
+| `fig1_model_comparison.png` | Model comparison boxplot and $\Delta LL$ histogram |
+| `fig2_transition_weights.png` | Transition-weight summary figure |
+| `fig3_individual_differences.png` | `alpha_pos` vs dwell-time scatter |
+| `fig4_block_boundaries.png` | Peri-boundary RPE and engagement figure, when boundaries are available |
+| `live/cv_mouse_*.json` | Per-mouse incremental CV outputs |
+| `live/full_mouse_*.json` | Per-mouse incremental full-session outputs |
+| `live/analysis_*.json` | Incremental analysis-stage outputs |
