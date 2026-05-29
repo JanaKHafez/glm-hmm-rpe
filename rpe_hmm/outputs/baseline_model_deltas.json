@@ -1,0 +1,52 @@
+[
+  {
+    "model": "M1 Raw Reward",
+    "model_key": "ll_m1",
+    "baseline_key": "ll_m0",
+    "n_subjects": 36,
+    "mean_delta_vs_baseline": 0.34498516477086555,
+    "ci_lo": 0.3316199632810267,
+    "ci_hi": 0.3578775885096066,
+    "se": 0.007290144350034
+  },
+  {
+    "model": "M2-Q RPE",
+    "model_key": "ll_m2_q",
+    "baseline_key": "ll_m0",
+    "n_subjects": 36,
+    "mean_delta_vs_baseline": 0.5587713051671264,
+    "ci_lo": 0.5487119334731693,
+    "ci_hi": 0.5671212161145134,
+    "se": 0.004942120551217535
+  },
+  {
+    "model": "M2-B Belief",
+    "model_key": "ll_m2_b",
+    "baseline_key": "ll_m0",
+    "n_subjects": 36,
+    "mean_delta_vs_baseline": 0.5950626152752002,
+    "ci_lo": 0.5891229554464802,
+    "ci_hi": 0.6009119446101777,
+    "se": 0.003197712198859489
+  },
+  {
+    "model": "M3-Q Combined",
+    "model_key": "ll_m3_q",
+    "baseline_key": "ll_m0",
+    "n_subjects": 36,
+    "mean_delta_vs_baseline": 0.5702130082529642,
+    "ci_lo": 0.5616063018257759,
+    "ci_hi": 0.5776070535263947,
+    "se": 0.004311354944891525
+  },
+  {
+    "model": "M3-B Combined",
+    "model_key": "ll_m3_b",
+    "baseline_key": "ll_m0",
+    "n_subjects": 36,
+    "mean_delta_vs_baseline": 0.600848261963994,
+    "ci_lo": 0.5950835294384683,
+    "ci_hi": 0.6067292600556962,
+    "se": 0.002893988353286514
+  }
+]

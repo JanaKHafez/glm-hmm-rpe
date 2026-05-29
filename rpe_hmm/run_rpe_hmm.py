@@ -11,11 +11,10 @@ This script implements the complete analysis pipeline:
 - M3-Belief: Combined (M1 + M2-Belief)
 
 Analyses:
-1. Model comparison with Wilcoxon, bootstrap CI, (permutation test)
+1. Model comparison with Wilcoxon and bootstrap CI
 1b. Belief vs Q-learning RPE comparison
-2. Transition weight signatures (engaged↔disengaged)... UNDER DEVELOPMENT
-3. Individual differences (α⁺ vs dwell time)... UNDER DEVELOPMENT
-4. Block boundary peri-event analysis... UNDER DEVELOPMENT
+2. Transition weight signatures (engaged↔disengaged)
+3. Individual differences (α⁺ vs dwell time)
 """
 
 import os
@@ -48,7 +47,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.optimize import minimize
 from scipy.special import expit, softmax
-from scipy.stats import wilcoxon, spearmanr, ttest_1samp
+from scipy.stats import wilcoxon, spearmanr
 from sklearn.model_selection import KFold
 from tqdm.auto import tqdm
 
@@ -90,7 +89,7 @@ plt.rcParams.update({
 
 # Paths
 DATA_DIR = REPO_ROOT / "data" / "ibl" / "Della_cluster_data"
-OUT_DIR = REPO_ROOT / "rpe_analysis" / "outputs"
+OUT_DIR = REPO_ROOT / "rpe_hmm" / "outputs"
 LIVE_DIR = OUT_DIR / "live"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 LIVE_DIR.mkdir(parents=True, exist_ok=True)
@@ -123,11 +122,6 @@ TAU_FILTER = 4.0            # Exponential filter tau (matching Mohammadi et al.)
 
 # Statistical settings
 BOOTSTRAP_N = 200           # Bootstrap resamples for CIs
-N_PERMUTATIONS = 00         # Permutation test iterations
-NULL_MODE = "circular_shift"  # or "shuffle"
-
-# Block boundary analysis
-BOUNDARY_WINDOW = 20        # Half-width of peri-boundary window
 
 # How many mice to analyze (None = all)
 N_MICE = None  # Set to 5 for quick test
@@ -444,27 +438,6 @@ def build_trans_m3(trans_mat_orig, rpe_df):
     return np.column_stack([m1, m2])
 
 
-def permute_rpes(rpes, mode="circular_shift", rng=None):
-    """
-    Null generator for permutation test.
-    Breaks temporal alignment while preserving structure.
-    """
-    rpes = np.asarray(rpes).copy()
-    rng = rng or np.random.default_rng(0)
-    
-    if len(rpes) < 3:
-        return rpes
-    
-    if mode == "circular_shift":
-        shift = int(rng.integers(1, len(rpes)))
-        return np.roll(rpes, shift)
-    
-    if mode == "shuffle":
-        return rng.permutation(rpes)
-    
-    raise ValueError(f"Unknown mode: {mode}")
-
-
 # ==============================================================================
 # GLM-HMM FITTING (using ssm.HMM_TO)
 # ==============================================================================
@@ -704,8 +677,6 @@ def analyze_mouse_cv(mouse_name, data_dir, rng):
         "ll_m2_q": [], "ll_m2_b": [],
         "ll_m3_q": [], "ll_m3_b": [],
         "n_trials": [],
-        "delta_ll_real": [],      # M2_q - M1
-        "delta_ll_null": [],      # permutation nulls
         "sessions": [],
     }
     
@@ -765,44 +736,6 @@ def analyze_mouse_cv(mouse_name, data_dir, rng):
             print(f"  [{mouse_name}] fold {fold}: {fold_ok}/6 models OK  {ll_str}")
         
         results["n_trials"].append(test_idx.sum())
-        
-        # Real delta (M2_q - M1)
-        delta_real = fold_lls.get("m2_q", np.nan) - fold_lls.get("m1", np.nan)
-        results["delta_ll_real"].append(delta_real)
-        
-        # Permutation null for this fold
-        null_deltas = []
-        for _ in range(N_PERMUTATIONS):
-            rpes_perm = permute_rpes(rpes_q_full, mode=NULL_MODE, rng=rng)
-            rpe_df_perm = compute_rpe_regressors(rpes_perm)
-            trans_m2_perm = build_trans_m2(rpe_df_perm)
-            
-            try:
-                hmm_m1, _ = fit_glmhmm(
-                    obs_mat[train_idx], trans_m1[train_idx],
-                    choices_clean[train_idx], valid_mask[train_idx],
-                    n_iters=N_EM_ITERS_CV
-                )
-                ll_m1 = compute_test_ll(
-                    hmm_m1, obs_mat[test_idx], trans_m1[test_idx],
-                    choices_clean[test_idx], valid_mask[test_idx]
-                )
-                
-                hmm_m2, _ = fit_glmhmm(
-                    obs_mat[train_idx], trans_m2_perm[train_idx],
-                    choices_clean[train_idx], valid_mask[train_idx],
-                    n_iters=N_EM_ITERS_CV
-                )
-                ll_m2 = compute_test_ll(
-                    hmm_m2, obs_mat[test_idx], trans_m2_perm[test_idx],
-                    choices_clean[test_idx], valid_mask[test_idx]
-                )
-                
-                null_deltas.append(ll_m2 - ll_m1)
-            except:
-                null_deltas.append(np.nan)
-        
-        results["delta_ll_null"].append(null_deltas)
     
     return results
 
@@ -874,6 +807,7 @@ def analyze_mouse_full(mouse_name, data_dir, rng):
         "rl_params": rl_params,
         "W_obs_list": [],
         "W_trans_list": [],
+        "trans_rpe_list": [],
         "states_list": [],
         "rpes_list": [],
         "block_list": [],
@@ -904,6 +838,7 @@ def analyze_mouse_full(mouse_name, data_dir, rng):
             W_trans = get_transition_weights(hmm)
             
             results["W_trans_list"].append(W_trans)
+            results["trans_rpe_list"].append(trans_m2_q[sess_idx][:, :4])
             results["states_list"].append(states)
             results["rpes_list"].append(rpes_q_full[sess_idx])
             results["engaged_idx"].append(eng_idx)
@@ -994,7 +929,6 @@ def analysis_1_model_comparison(all_cv_results):
     
     # Compute per-subject mean ΔLL
     subject_deltas = []
-    subject_deltas_null = []
     
     for r in all_cv_results:
         if len(r["ll_m1"]) == 0:
@@ -1004,13 +938,8 @@ def analysis_1_model_comparison(all_cv_results):
         mean_m2_q = np.nanmean(r["ll_m2_q"])
         delta = mean_m2_q - mean_m1
         subject_deltas.append(delta)
-        
-        # Collect null deltas
-        for null_arr in r["delta_ll_null"]:
-            subject_deltas_null.extend(null_arr)
     
     subject_deltas = np.array(subject_deltas)
-    subject_deltas_null = np.array([x for x in subject_deltas_null if np.isfinite(x)])
     
     # Wilcoxon test
     stat, p, r_rb, n = wilcoxon_test(subject_deltas)
@@ -1018,17 +947,10 @@ def analysis_1_model_comparison(all_cv_results):
     # Bootstrap CI
     mean_delta, ci_lo, ci_hi, se = bootstrap_mean_ci(subject_deltas)
     
-    # Permutation p-value
-    if len(subject_deltas_null) > 0:
-        perm_p = (1 + np.sum(subject_deltas_null >= mean_delta)) / (len(subject_deltas_null) + 1)
-    else:
-        perm_p = np.nan
-    
     print(f"  N subjects: {n}")
     print(f"  Mean ΔLL (M2-Q − M1): {mean_delta:+.4f} bits/trial")
     print(f"  95% Bootstrap CI: [{ci_lo:+.4f}, {ci_hi:+.4f}], SE={se:.4f}")
     print(f"  Wilcoxon stat={stat:.1f}, p={p:.4e}, rank-biserial r={r_rb:+.3f}")
-    print(f"  Permutation p={perm_p:.4e} (mode={NULL_MODE}, n_perm={N_PERMUTATIONS})")
     direction = "RPE > Raw Reward" if mean_delta > 0 else "Raw Reward ≥ RPE"
     print(f"  Direction: {direction}")
     
@@ -1041,10 +963,54 @@ def analysis_1_model_comparison(all_cv_results):
         "wilcoxon_stat": stat,
         "wilcoxon_p": p,
         "rank_biserial_r": r_rb,
-        "perm_p": perm_p,
         "subject_deltas": subject_deltas,
-        "null_deltas": subject_deltas_null,
     }
+
+
+def summarize_model_deltas_vs_baseline(summary_df):
+    """
+    Summarize per-subject CV log-likelihood improvement over the L0 baseline.
+    Returns a table with mean delta and bootstrap CI for each model.
+    """
+    print("\n" + "=" * 70)
+    print("MODEL ΔLL VS L0 BASELINE")
+    print("=" * 70)
+
+    model_map = [
+        ("ll_m1", "M1 Raw Reward"),
+        ("ll_m2_q", "M2-Q RPE"),
+        ("ll_m2_b", "M2-B Belief"),
+        ("ll_m3_q", "M3-Q Combined"),
+        ("ll_m3_b", "M3-B Combined"),
+    ]
+
+    rows = []
+    if len(summary_df) == 0 or "ll_m0" not in summary_df.columns:
+        print("  No summary data available")
+        return pd.DataFrame(rows)
+
+    for model_col, label in model_map:
+        if model_col not in summary_df.columns:
+            continue
+        deltas = (summary_df[model_col] - summary_df["ll_m0"]).to_numpy(dtype=float)
+        deltas = deltas[np.isfinite(deltas)]
+        mean_delta, ci_lo, ci_hi, se = bootstrap_mean_ci(deltas)
+        print(
+            f"  {label}: ΔLL={mean_delta:+.4f} bits/trial, "
+            f"95% CI [{ci_lo:+.4f}, {ci_hi:+.4f}], SE={se:.4f}, N={len(deltas)}"
+        )
+        rows.append({
+            "model": label,
+            "model_key": model_col,
+            "baseline_key": "ll_m0",
+            "n_subjects": int(len(deltas)),
+            "mean_delta_vs_baseline": mean_delta,
+            "ci_lo": ci_lo,
+            "ci_hi": ci_hi,
+            "se": se,
+        })
+
+    return pd.DataFrame(rows)
 
 
 def analysis_1b_belief_vs_q(all_cv_results):
@@ -1087,100 +1053,93 @@ def analysis_1b_belief_vs_q(all_cv_results):
 
 def analysis_2_transition_weights(all_full_results):
     """
-    Analysis 2: RPE signatures at state transitions.
-    Extracts transition weights for engaged↔disengaged directions.
+    Analysis 2: RPE signatures at realized state transitions.
+    Summarizes the transition regressors present on trials where the Viterbi
+    state sequence switches engaged↔disengaged.
     """
     print("\n" + "=" * 70)
     print("ANALYSIS 2 — RPE Signatures at Motivational State Transitions")
     print("=" * 70)
-    
-    # Collect weights: cumpos, cumneg, abs_running, current
-    # For both directions: engaged→disengaged, disengaged→engaged
-    e2d = {i: [] for i in range(4)}  # engaged to disengaged
-    d2e = {i: [] for i in range(4)}  # disengaged to engaged
-    
-    n_3d, n_2d, n_skipped = 0, 0, 0
+    reg_names = ["cumpos", "cumneg", "abs_running", "current"]
+    reg_cols = ["rpe_cumpos_filt", "rpe_cumneg_filt", "rpe_abs_running", "rpe_current"]
+    event_rows = {
+        "engaged_to_disengaged": [],
+        "disengaged_to_engaged": [],
+    }
+    n_sessions = 0
 
     for r in all_full_results:
-        for W_trans, eng in zip(r["W_trans_list"], r["engaged_idx"]):
-            if W_trans is None:
-                n_skipped += 1
+        trans_rpe_list = r.get("trans_rpe_list", [])
+        use_saved_inputs = len(trans_rpe_list) == len(r["states_list"])
+
+        for sess_i, (session_id, states, eng, rpes) in enumerate(zip(
+            r["session_ids"],
+            r["states_list"],
+            r["engaged_idx"],
+            r["rpes_list"],
+        )):
+            states = np.asarray(states)
+            if len(states) < 2:
                 continue
 
-            W = np.asarray(W_trans)
-            if W.ndim == 3:
-                # Pair-specific transition weights: (K, K, M)
-                n_3d += 1
-                K = W.shape[0]
-                dis_states = [s for s in range(K) if s != eng]
-
-                for j in dis_states:
-                    for reg_i in range(min(4, W.shape[2])):
-                        e2d[reg_i].append(W[eng, j, reg_i])
-
-                for i in dis_states:
-                    for reg_i in range(min(4, W.shape[2])):
-                        d2e[reg_i].append(W[i, eng, reg_i])
-
-            elif W.ndim == 2:
-                # inputdrivenalt stores destination-only weights:
-                # usually (K-1, M), with implicit zero row for one reference state.
-                # Build a K x M destination matrix so each state's incoming
-                # sensitivity to regressors can be compared.
-                n_2d += 1
-                M = W.shape[1]
-
-                if W.shape[0] == N_STATES - 1:
-                    W_dest = np.vstack([W, np.zeros((1, M))])
-                elif W.shape[0] == N_STATES:
-                    W_dest = W
-                else:
-                    n_skipped += 1
-                    continue
-
-                K = W_dest.shape[0]
-                if eng < 0 or eng >= K:
-                    n_skipped += 1
-                    continue
-
-                dis_states = [s for s in range(K) if s != eng]
-
-                # Engaged -> Disengaged: incoming weights to disengaged destinations.
-                for j in dis_states:
-                    for reg_i in range(min(4, M)):
-                        e2d[reg_i].append(W_dest[j, reg_i])
-
-                # Disengaged -> Engaged: source-invariant in this formulation,
-                # so append the engaged destination weight once per fit.
-                for reg_i in range(min(4, M)):
-                    d2e[reg_i].append(W_dest[eng, reg_i])
-
+            if use_saved_inputs:
+                X = np.asarray(trans_rpe_list[sess_i])
             else:
-                n_skipped += 1
+                rpe_df = compute_rpe_regressors(rpes)
+                X = rpe_df[reg_cols].fillna(0).values
+
+            if X.shape[0] != len(states):
                 continue
 
-    print(f"  Transition weight formats: 3D={n_3d}, 2D={n_2d}, skipped={n_skipped}")
-    
+            n_sessions += 1
+            for t in range(1, len(states)):
+                prev_state = int(states[t - 1])
+                curr_state = int(states[t])
+                row = {
+                    "mouse": r["mouse"],
+                    "session_id": session_id,
+                    "trial": int(t),
+                    "from_state": prev_state,
+                    "to_state": curr_state,
+                    "engaged_idx": int(eng),
+                    "cumpos": float(X[t, 0]),
+                    "cumneg": float(X[t, 1]),
+                    "abs_running": float(X[t, 2]),
+                    "current": float(X[t, 3]),
+                }
+                if prev_state == eng and curr_state != eng:
+                    event_rows["engaged_to_disengaged"].append(row)
+                elif prev_state != eng and curr_state == eng:
+                    event_rows["disengaged_to_engaged"].append(row)
+
     reg_names = ["cumpos", "cumneg", "abs_running", "current"]
     results = {"engaged_to_disengaged": {}, "disengaged_to_engaged": {}}
+    print(f"  Sessions contributing: {n_sessions}")
     
-    for direction, data, label in [
-        ("engaged_to_disengaged", e2d, "Engaged → Disengaged"),
-        ("disengaged_to_engaged", d2e, "Disengaged → Engaged"),
+    for direction, label in [
+        ("engaged_to_disengaged", "Engaged → Disengaged"),
+        ("disengaged_to_engaged", "Disengaged → Engaged"),
     ]:
         print(f"\n  {label}:")
+        df_dir = pd.DataFrame(event_rows[direction])
+        print(f"    n_events={len(df_dir)}")
         for reg_i, reg_name in enumerate(reg_names):
-            arr = np.array(data.get(reg_i, []))
+            arr = df_dir[reg_name].to_numpy(dtype=float) if len(df_dir) > 0 else np.array([])
             if len(arr) == 0:
                 print(f"    {reg_name}: no data")
                 continue
             mean, lo, hi, se = bootstrap_mean_ci(arr)
-            sign = "positive" if mean > 0 else "negative"
             excludes_zero = "YES" if (lo > 0 or hi < 0) else "no"
             print(f"    {reg_name}: mean={mean:+.4f}, 95% CI [{lo:+.4f}, {hi:+.4f}], "
                   f"SE={se:.4f}, excludes 0: {excludes_zero}")
             results[direction][reg_name] = {
-                "mean": mean, "ci_lo": lo, "ci_hi": hi, "se": se, "n": len(arr)
+                "mean": mean,
+                "ci_lo": lo,
+                "ci_hi": hi,
+                "se": se,
+                "n": len(arr),
+                "n_mice": int(df_dir["mouse"].nunique()),
+                "n_sessions": int(df_dir["session_id"].nunique()),
             }
     
     return results
@@ -1195,8 +1154,22 @@ def analysis_3_individual_differences(all_full_results, all_cv_results):
     print("ANALYSIS 3 — Individual Differences: Learning Rate vs State Stability")
     print("=" * 70)
     
+    cv_by_mouse = {
+        r["mouse"]: r for r in all_cv_results
+        if r is not None and r.get("mouse") is not None
+    }
+
     rows = []
-    for r_full, r_cv in zip(all_full_results, all_cv_results):
+    n_missing_cv = 0
+    for r_full in all_full_results:
+        if r_full is None:
+            continue
+
+        r_cv = cv_by_mouse.get(r_full["mouse"])
+        if r_cv is None:
+            n_missing_cv += 1
+            continue
+
         # Compute mean dwell time
         all_dwells = []
         for states, eng in zip(r_full["states_list"], r_full["engaged_idx"]):
@@ -1224,6 +1197,8 @@ def analysis_3_individual_differences(all_full_results, all_cv_results):
     r, p = spearmanr(df["alpha_pos"], df["mean_dwell"])
     
     print(f"  N subjects: {len(df)}")
+    if n_missing_cv > 0:
+        print(f"  Skipped mice missing CV match: {n_missing_cv}")
     print(f"  Spearman ρ (α⁺ vs mean dwell): {r:+.3f}")
     print(f"  p-value: {p:.4e}")
     print(f"  ρ² (variance explained): {r**2:.3f}")
@@ -1233,80 +1208,6 @@ def analysis_3_individual_differences(all_full_results, all_cv_results):
     print(f"  Association: {assoc}")
     
     return df, r, p
-
-
-def analysis_4_block_boundaries(all_full_results):
-    """
-    Analysis 4: Peri-event RPE and engagement around block switches.
-    """
-    print("\n" + "=" * 70)
-    print("ANALYSIS 4 — Block Boundary Analysis")
-    print("=" * 70)
-    
-    rpe_events = []
-    eng_events = []
-    
-    for r in all_full_results:
-        for rpes, states, block, eng in zip(
-            r["rpes_list"], r["states_list"], r["block_list"], r["engaged_idx"]
-        ):
-            if block is None:
-                continue
-            
-            T = len(rpes)
-            
-            # Find block boundaries
-            for t in range(1, len(block)):
-                if np.isnan(block[t-1]) or np.isnan(block[t]):
-                    continue
-                if block[t-1] == block[t]:
-                    continue
-                
-                b = t  # boundary trial
-                if b - BOUNDARY_WINDOW < 0 or b + BOUNDARY_WINDOW >= T:
-                    continue
-                
-                # Extract window
-                rpe_window = rpes[b - BOUNDARY_WINDOW: b + BOUNDARY_WINDOW + 1]
-                state_window = states[b - BOUNDARY_WINDOW: b + BOUNDARY_WINDOW + 1]
-                eng_window = (state_window == eng).astype(float)
-                
-                rpe_events.append(rpe_window)
-                eng_events.append(eng_window)
-    
-    if not rpe_events:
-        print("  No block boundaries found")
-        return None, None, None
-    
-    rpe_mat = np.array(rpe_events)
-    eng_mat = np.array(eng_events)
-    
-    # RPE at boundary
-    mid = BOUNDARY_WINDOW
-    rpe_at_boundary = rpe_mat[:, mid]
-    t_stat, t_p = ttest_1samp(rpe_at_boundary, popmean=0)
-    
-    # Engagement pre vs post
-    pre_eng = eng_mat[:, :mid].mean()
-    post_eng = eng_mat[:, mid+1:].mean()
-    delta_eng = post_eng - pre_eng
-    
-    print(f"  Block boundaries found: {len(rpe_mat)}")
-    print(f"  Mean RPE at boundary: {rpe_at_boundary.mean():+.4f}")
-    print(f"  One-sample t-test vs 0: t={t_stat:.3f}, p={t_p:.4e}")
-    print(f"  P(engaged) pre: {pre_eng:.3f}")
-    print(f"  P(engaged) post: {post_eng:.3f}")
-    print(f"  ΔP(engaged): {delta_eng:+.3f}")
-    
-    return rpe_mat, eng_mat, {
-        "n_boundaries": len(rpe_mat),
-        "mean_rpe_at_boundary": float(rpe_at_boundary.mean()),
-        "t_stat": float(t_stat),
-        "t_p": float(t_p),
-        "p_engaged_pre": float(pre_eng),
-        "p_engaged_post": float(post_eng),
-        "delta_p_engaged": float(delta_eng),
-    }
 
 
 # ==============================================================================
@@ -1359,7 +1260,7 @@ def fig_model_comparison(summary_df, h1_results):
 
 
 def fig_transition_weights(h2_results):
-    """Figure: Transition weight bar plots."""
+    """Figure: RPE signature summaries at state transitions."""
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
     
     reg_names = ["cumpos", "cumneg", "abs_running", "current"]
@@ -1381,7 +1282,7 @@ def fig_transition_weights(h2_results):
         ax.errorbar(range(4), means, yerr=errs, fmt="none", color="black", capsize=4)
         ax.axhline(0, color="black", lw=0.8)
         ax.set_title(title, fontweight="bold")
-        ax.set_ylabel("Transition Weight")
+        ax.set_ylabel("Mean regressor value at transition")
         sns.despine(ax=ax)
     
     plt.tight_layout()
@@ -1412,50 +1313,6 @@ def fig_individual_differences(h3_df, r, p):
     
     plt.tight_layout()
     fig.savefig(OUT_DIR / "fig3_individual_differences.png", dpi=FIGURE_DPI)
-    plt.close()
-
-
-def fig_block_boundaries(rpe_mat, eng_mat, h4_stats):
-    """Figure: Peri-boundary RPE and engagement."""
-    if rpe_mat is None:
-        return
-    
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-    offsets = np.arange(-BOUNDARY_WINDOW, BOUNDARY_WINDOW + 1)
-    
-    # RPE
-    ax = axes[0]
-    mean_rpe = rpe_mat.mean(0)
-    sem_rpe = rpe_mat.std(0) / np.sqrt(len(rpe_mat))
-    ax.fill_between(offsets, mean_rpe - sem_rpe, mean_rpe + sem_rpe, alpha=0.3, color="#2171b5")
-    ax.plot(offsets, mean_rpe, color="#2171b5", lw=2)
-    ax.axvline(0, color="black", linestyle="--", lw=1, label="Block boundary")
-    ax.axhline(0, color="gray", linestyle="--", lw=0.5)
-    ax.set_xlabel("Trials from block boundary")
-    ax.set_ylabel("Mean RPE")
-    ax.set_title("RPE Around Block Switches", fontweight="bold")
-    ax.legend()
-    sns.despine(ax=ax)
-    
-    # Engagement
-    ax = axes[1]
-    mean_eng = eng_mat.mean(0)
-    sem_eng = eng_mat.std(0) / np.sqrt(len(eng_mat))
-    ax.fill_between(offsets, mean_eng - sem_eng, mean_eng + sem_eng, alpha=0.3, color="#238b45")
-    ax.plot(offsets, mean_eng, color="#238b45", lw=2)
-    ax.axvline(0, color="black", linestyle="--", lw=1)
-    ax.axhline(h4_stats["p_engaged_pre"], xmin=0, xmax=0.48, color="gray", 
-               linestyle=":", label=f"Pre={h4_stats['p_engaged_pre']:.2f}")
-    ax.axhline(h4_stats["p_engaged_post"], xmin=0.52, xmax=1, color="gray", 
-               linestyle=":", label=f"Post={h4_stats['p_engaged_post']:.2f}")
-    ax.set_xlabel("Trials from block boundary")
-    ax.set_ylabel("P(Engaged State)")
-    ax.set_title("Engagement Around Block Switches", fontweight="bold")
-    ax.legend()
-    sns.despine(ax=ax)
-    
-    plt.tight_layout()
-    fig.savefig(OUT_DIR / "fig4_block_boundaries.png", dpi=FIGURE_DPI)
     plt.close()
 
 
@@ -1569,6 +1426,19 @@ def main():
     summary_df.to_csv(OUT_DIR / "summary.csv", index=False)
     summary_df.to_csv(LIVE_DIR / "summary_final.csv", index=False)
     print(f"\nSummary saved to {OUT_DIR / 'summary.csv'}")
+
+    baseline_delta_df = summarize_model_deltas_vs_baseline(summary_df)
+    baseline_delta_df.to_csv(OUT_DIR / "baseline_model_deltas.csv", index=False)
+    baseline_delta_df.to_csv(LIVE_DIR / "baseline_model_deltas.csv", index=False)
+    save_json(
+        OUT_DIR / "baseline_model_deltas.json",
+        baseline_delta_df.to_dict(orient="records"),
+    )
+    save_json(
+        LIVE_DIR / "baseline_model_deltas.json",
+        baseline_delta_df.to_dict(orient="records"),
+    )
+    print(f"Baseline delta summary saved to {OUT_DIR / 'baseline_model_deltas.csv'}")
     
     # Run analyses
     h1_results = analysis_1_model_comparison(all_cv_results)
@@ -1590,21 +1460,11 @@ def main():
         "spearman_p": h3_p,
     })
     print(f"[LIVE][ANALYSIS] saved analysis_3.json")
-
-    rpe_mat, eng_mat, h4_stats = analysis_4_block_boundaries(all_full_results)
-    save_json(LIVE_DIR / "analysis_4.json", {
-        "rpe_mat": rpe_mat,
-        "eng_mat": eng_mat,
-        "stats": h4_stats,
-    })
-    print(f"[LIVE][ANALYSIS] saved analysis_4.json")
     
     # Generate figures
     fig_model_comparison(summary_df, h1_results)
     fig_transition_weights(h2_results)
     fig_individual_differences(h3_df, h3_r, h3_p)
-    if h4_stats is not None:
-        fig_block_boundaries(rpe_mat, eng_mat, h4_stats)
     
     # Save all results
     results = {
@@ -1613,17 +1473,14 @@ def main():
             "N_FOLDS": N_FOLDS,
             "N_EM_ITERS_CV": N_EM_ITERS_CV,
             "N_EM_ITERS_FULL": N_EM_ITERS_FULL,
-            "N_PERMUTATIONS": N_PERMUTATIONS,
             "RPE_WINDOW": RPE_WINDOW,
             "TAU_FILTER": TAU_FILTER,
-            "BOUNDARY_WINDOW": BOUNDARY_WINDOW,
             "baseline_model": "L0 training-set choice-frequency baseline",
         },
         "analysis_1": h1_results,
         "analysis_1b": h1b_results,
         "analysis_2": h2_results,
         "analysis_3": {"spearman_r": h3_r, "spearman_p": h3_p},
-        "analysis_4": h4_stats,
     }
 
     save_json(OUT_DIR / "results.json", results)

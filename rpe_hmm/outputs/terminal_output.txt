@@ -1,251 +1,19 @@
 ======================================================================
-RPE-based GLM-HMM Full Analysis
-Date: 2026-05-29T04:02:46.612532+00:00
+MODEL ΔLL VS L0 BASELINE
 ======================================================================
-
-Analyzing 38 mice...
-Models: L0, M1, M2-Q, M2-Belief, M3-Q, M3-Belief
-K=4 states, 2-fold CV
-Using 63 parallel workers
-
-CV fitting:   0%|                                                                                                                                 | 0/38 [00:00<?, ?it/s]  [NYU-23] 23535 valid trials, RL params: a+=0.273 a-=0.865 b=0.48
-  [CSHL_008] 30610 valid trials, RL params: a+=0.338 a-=0.700 b=0.68
-  [CSHL_007] 25495 valid trials, RL params: a+=0.475 a-=0.962 b=0.33
-  [ibl_witten_05] SKIP: RL params hit boundary: [0.999 0.001 0.1   1.   ]
-[LIVE][CV] ibl_witten_05: skipped_or_failed
-CV fitting:   3%|███▏                                                                                                                     | 1/38 [01:30<55:30, 90.00s/it]  [DY_011] 24306 valid trials, RL params: a+=0.219 a-=0.653 b=0.95
-  [NYU-06] 33556 valid trials, RL params: a+=0.236 a-=0.968 b=0.56
-  [SWC_043] 30013 valid trials, RL params: a+=0.497 a-=0.703 b=0.45
-  [SWC_030] 46723 valid trials, RL params: a+=0.315 a-=0.462 b=0.99
-  [CSHL_010] 28520 valid trials, RL params: a+=0.251 a-=0.747 b=0.91
-  [IBL-T2] 33440 valid trials, RL params: a+=0.359 a-=0.679 b=0.63
-  [IBL-T4] 38988 valid trials, RL params: a+=0.264 a-=0.931 b=0.53
-  [ZM_1746] 29257 valid trials, RL params: a+=0.221 a-=0.907 b=0.78
-  [SWC_021] 30677 valid trials, RL params: a+=0.495 a-=0.444 b=1.10
-  [DY_010] 25229 valid trials, RL params: a+=0.183 a-=0.570 b=1.40
-  [NYU-09] 31703 valid trials, RL params: a+=0.238 a-=0.975 b=0.66
-  [IBL-T3] 27509 valid trials, RL params: a+=0.386 a-=0.916 b=0.48
-  [ZM_1371] 34245 valid trials, RL params: a+=0.327 a-=0.757 b=0.84
-  [CSHL046] 34062 valid trials, RL params: a+=0.285 a-=0.643 b=0.88
-  [ZM_1369] 33798 valid trials, RL params: a+=0.305 a-=0.715 b=0.95
-  [NYU-25] 38702 valid trials, RL params: a+=0.455 a-=0.866 b=0.71
-  [NYU-02] 50364 valid trials, RL params: a+=0.326 a-=0.980 b=0.48
-  [ibl_witten_14] 38506 valid trials, RL params: a+=0.254 a-=0.460 b=1.75
-  [CSHL_002] 45336 valid trials, RL params: a+=0.497 a-=0.875 b=0.65
-  [ZM_1372] 35883 valid trials, RL params: a+=0.364 a-=0.585 b=1.04
-  [ZM_1745] 45657 valid trials, RL params: a+=0.483 a-=0.765 b=0.68
-  [CSHL_003] 42585 valid trials, RL params: a+=0.238 a-=0.568 b=1.32
-  [CSHL_014] 47411 valid trials, RL params: a+=0.339 a-=0.632 b=0.99
-  [CSHL_015] 47103 valid trials, RL params: a+=0.286 a-=0.492 b=1.55
-  [NYU-23] fold 0: 6/6 models OK  m0=-0.6964, m1=-0.4008, m2_q=-0.1534, m2_b=-0.1223, m3_q=-0.1518, m3_b=-0.1157
-  [IBL-T1] 47916 valid trials, RL params: a+=0.304 a-=0.976 b=0.53
-  [CSHL_007] fold 0: 6/6 models OK  m0=-0.7032, m1=-0.3881, m2_q=-0.1610, m2_b=-0.0822, m3_q=-0.1503, m3_b=-0.0811
-  [ibl_witten_13] 50859 valid trials, RL params: a+=0.262 a-=0.507 b=1.34
-  [NYU-01] 50685 valid trials, RL params: a+=0.391 a-=0.933 b=0.56
-  [DY_011] fold 0: 6/6 models OK  m0=-0.6891, m1=-0.2981, m2_q=-0.1269, m2_b=-0.1090, m3_q=-0.1062, m3_b=-0.1041
-  [CSHL_005] SKIP: RL params hit boundary: [0.44026612 0.999      0.48727687 0.        ]
-[LIVE][CV] CSHL_005: skipped_or_failed
-CV fitting:   5%|██████▏                                                                                                               | 2/38 [11:43<3:58:38, 397.73s/it]  [ZM_1743] 35823 valid trials, RL params: a+=0.215 a-=0.780 b=0.86
-  [ibl_witten_04] 56161 valid trials, RL params: a+=0.323 a-=0.790 b=0.81
-  [CSHL_010] fold 0: 6/6 models OK  m0=-0.6941, m1=-0.4203, m2_q=-0.0935, m2_b=-0.0638, m3_q=-0.0838, m3_b=-0.0639
-  [CSHL_008] fold 0: 6/6 models OK  m0=-0.7069, m1=-0.3199, m2_q=-0.0873, m2_b=-0.0622, m3_q=-0.0776, m3_b=-0.0541
-  [SWC_043] fold 0: 6/6 models OK  m0=-0.6664, m1=-0.3546, m2_q=-0.1407, m2_b=-0.1015, m3_q=-0.1313, m3_b=-0.1029
-  [DY_010] fold 0: 6/6 models OK  m0=-0.6909, m1=-0.2595, m2_q=-0.1172, m2_b=-0.1100, m3_q=-0.1080, m3_b=-0.0899
-  [ibl_witten_07] 62358 valid trials, RL params: a+=0.498 a-=0.625 b=0.60
-  [NYU-06] fold 0: 6/6 models OK  m0=-0.6909, m1=-0.3566, m2_q=-0.1564, m2_b=-0.0971, m3_q=-0.1485, m3_b=-0.0892
-  [IBL-T3] fold 0: 6/6 models OK  m0=-0.6742, m1=-0.3629, m2_q=-0.1465, m2_b=-0.0903, m3_q=-0.1417, m3_b=-0.0877
-  [ZM_1746] fold 0: 6/6 models OK  m0=-0.6937, m1=-0.3037, m2_q=-0.1078, m2_b=-0.0875, m3_q=-0.1068, m3_b=-0.0767
-  [IBL-T2] fold 0: 6/6 models OK  m0=-0.6925, m1=-0.3187, m2_q=-0.1078, m2_b=-0.0894, m3_q=-0.1051, m3_b=-0.0824
-  [ibl_witten_12] 50492 valid trials, RL params: a+=0.194 a-=0.631 b=1.30
-  [SWC_021] fold 0: 6/6 models OK  m0=-0.6876, m1=-0.4111, m2_q=-0.1098, m2_b=-0.1063, m3_q=-0.1085, m3_b=-0.0984
-  [NYU-04] 66913 valid trials, RL params: a+=0.323 a-=0.693 b=0.80
-  [CSHL046] fold 0: 6/6 models OK  m0=-0.6827, m1=-0.3910, m2_q=-0.1295, m2_b=-0.1035, m3_q=-0.1236, m3_b=-0.1035
-  [NYU-09] fold 0: 6/6 models OK  m0=-0.6937, m1=-0.4177, m2_q=-0.1848, m2_b=-0.1218, m3_q=-0.1828, m3_b=-0.1149
-  [ZM_1371] fold 0: 6/6 models OK  m0=-0.6930, m1=-0.2808, m2_q=-0.1140, m2_b=-0.0881, m3_q=-0.1047, m3_b=-0.0819
-  [ZM_1369] fold 0: 6/6 models OK  m0=-0.6930, m1=-0.3255, m2_q=-0.1641, m2_b=-0.1020, m3_q=-0.1181, m3_b=-0.0863
-  [CSHL_007] fold 1: 6/6 models OK  m0=-0.6732, m1=-0.3920, m2_q=-0.1295, m2_b=-0.0657, m3_q=-0.1234, m3_b=-0.0646
-[LIVE][CV] saved CSHL_007: folds=2, mean_m1=-0.3901, mean_m2q=-0.1453
-CV fitting:   8%|█████████▎                                                                                                            | 3/38 [24:57<5:37:37, 578.78s/it]  [NYU-23] fold 1: 6/6 models OK  m0=-0.6963, m1=-0.4177, m2_q=-0.1712, m2_b=-0.1246, m3_q=-0.1597, m3_b=-0.1161
-[LIVE][CV] saved NYU-23: folds=2, mean_m1=-0.4093, mean_m2q=-0.1623
-CV fitting:  11%|████████████▍                                                                                                         | 4/38 [25:05<3:20:20, 353.55s/it]  [SWC_030] fold 0: 6/6 models OK  m0=-0.6934, m1=-0.4715, m2_q=-0.1342, m2_b=-0.1190, m3_q=-0.1295, m3_b=-0.1189
-  [IBL-T4] fold 0: 6/6 models OK  m0=-0.6909, m1=-0.3307, m2_q=-0.1627, m2_b=-0.0828, m3_q=-0.1192, m3_b=-0.0742
-  [DY_011] fold 1: 6/6 models OK  m0=-0.6897, m1=-0.3235, m2_q=-0.1443, m2_b=-0.1127, m3_q=-0.1226, m3_b=-0.1035
-[LIVE][CV] saved DY_011: folds=2, mean_m1=-0.3108, mean_m2q=-0.1356
-CV fitting:  13%|███████████████▌                                                                                                      | 5/38 [26:13<2:17:43, 250.42s/it]  [ibl_witten_14] fold 0: 6/6 models OK  m0=-0.6902, m1=-0.3014, m2_q=-0.1124, m2_b=-0.1050, m3_q=-0.0986, m3_b=-0.0918
-  [NYU-25] fold 0: 6/6 models OK  m0=-0.6810, m1=-0.4194, m2_q=-0.1934, m2_b=-0.1193, m3_q=-0.1592, m3_b=-0.1179
-  [ZM_1372] fold 0: 6/6 models OK  m0=-0.6920, m1=-0.3083, m2_q=-0.1102, m2_b=-0.0950, m3_q=-0.0984, m3_b=-0.0965
-  [CSHL_003] fold 0: 6/6 models OK  m0=-0.6931, m1=-0.2766, m2_q=-0.0826, m2_b=-0.0689, m3_q=-0.0753, m3_b=-0.0689
-  [ibl_witten_06] 65002 valid trials, RL params: a+=0.219 a-=0.549 b=1.44
-  [CSHL_002] fold 0: 6/6 models OK  m0=-0.6732, m1=-0.3262, m2_q=-0.1201, m2_b=-0.0614, m3_q=-0.1012, m3_b=-0.0547
-  [CSHL_010] fold 1: 6/6 models OK  m0=-0.6943, m1=-0.3963, m2_q=-0.1119, m2_b=-0.0656, m3_q=-0.1014, m3_b=-0.0649
-[LIVE][CV] saved CSHL_010: folds=2, mean_m1=-0.4083, mean_m2q=-0.1027
-CV fitting:  16%|██████████████████▋                                                                                                   | 6/38 [30:09<2:11:02, 245.70s/it]  [DY_010] fold 1: 6/6 models OK  m0=-0.6930, m1=-0.2740, m2_q=-0.1057, m2_b=-0.0943, m3_q=-0.0967, m3_b=-0.0939
-[LIVE][CV] saved DY_010: folds=2, mean_m1=-0.2668, mean_m2q=-0.1115
-CV fitting:  18%|█████████████████████▋                                                                                                | 7/38 [31:20<1:37:23, 188.50s/it]  [CSHL_008] fold 1: 6/6 models OK  m0=-0.6946, m1=-0.3297, m2_q=-0.0881, m2_b=-0.0674, m3_q=-0.0796, m3_b=-0.0594
-[LIVE][CV] saved CSHL_008: folds=2, mean_m1=-0.3248, mean_m2q=-0.0877
-CV fitting:  21%|████████████████████████▊                                                                                             | 8/38 [32:04<1:11:15, 142.52s/it]  [ZM_1745] fold 0: 6/6 models OK  m0=-0.6870, m1=-0.3263, m2_q=-0.1161, m2_b=-0.0957, m3_q=-0.1233, m3_b=-0.0888
-  [NYU-02] fold 0: 6/6 models OK  m0=-0.6942, m1=-0.3513, m2_q=-0.1514, m2_b=-0.0858, m3_q=-0.1483, m3_b=-0.0771
-  [SWC_043] fold 1: 6/6 models OK  m0=-0.6638, m1=-0.3943, m2_q=-0.1436, m2_b=-0.0919, m3_q=-0.1402, m3_b=-0.0827
-[LIVE][CV] saved SWC_043: folds=2, mean_m1=-0.3745, mean_m2q=-0.1421
-CV fitting:  24%|███████████████████████████▉                                                                                          | 9/38 [34:48<1:12:07, 149.21s/it]  [ZM_1743] fold 0: 6/6 models OK  m0=-0.6948, m1=-0.3455, m2_q=-0.1289, m2_b=-0.1126, m3_q=-0.1252, m3_b=-0.0984
-  [NYU-01] fold 0: 6/6 models OK  m0=-0.6930, m1=-0.3980, m2_q=-0.1603, m2_b=-0.0759, m3_q=-0.1429, m3_b=-0.0759
-  [SWC_021] fold 1: 6/6 models OK  m0=-0.6888, m1=-0.4494, m2_q=-0.1401, m2_b=-0.1092, m3_q=-0.1159, m3_b=-0.1093
-[LIVE][CV] saved SWC_021: folds=2, mean_m1=-0.4302, mean_m2q=-0.1249
-CV fitting:  26%|███████████████████████████████▎                                                                                       | 10/38 [35:25<53:29, 114.61s/it]  [ZM_1746] fold 1: 6/6 models OK  m0=-0.6963, m1=-0.3464, m2_q=-0.1458, m2_b=-0.0989, m3_q=-0.1393, m3_b=-0.0886
-[LIVE][CV] saved ZM_1746: folds=2, mean_m1=-0.3251, mean_m2q=-0.1268
-CV fitting:  29%|██████████████████████████████████▋                                                                                     | 11/38 [36:03<40:59, 91.08s/it]  [NYU-06] fold 1: 6/6 models OK  m0=-0.6966, m1=-0.3204, m2_q=-0.1619, m2_b=-0.1012, m3_q=-0.1294, m3_b=-0.0910
-[LIVE][CV] saved NYU-06: folds=2, mean_m1=-0.3385, mean_m2q=-0.1591
-CV fitting:  32%|█████████████████████████████████████▉                                                                                  | 12/38 [36:13<28:45, 66.36s/it]  [IBL-T3] fold 1: 6/6 models OK  m0=-0.6569, m1=-0.3480, m2_q=-0.1420, m2_b=-0.0793, m3_q=-0.1455, m3_b=-0.0740
-[LIVE][CV] saved IBL-T3: folds=2, mean_m1=-0.3554, mean_m2q=-0.1443
-CV fitting:  34%|█████████████████████████████████████████                                                                               | 13/38 [36:21<20:18, 48.74s/it]  [IBL-T2] fold 1: 6/6 models OK  m0=-0.6924, m1=-0.3519, m2_q=-0.1366, m2_b=-0.0964, m3_q=-0.1157, m3_b=-0.0864
-[LIVE][CV] saved IBL-T2: folds=2, mean_m1=-0.3353, mean_m2q=-0.1222
-CV fitting:  37%|████████████████████████████████████████████▏                                                                           | 14/38 [36:42<16:08, 40.35s/it]  [CSHL_014] fold 0: 6/6 models OK  m0=-0.6901, m1=-0.3799, m2_q=-0.1184, m2_b=-0.1107, m3_q=-0.1294, m3_b=-0.0957
-  [CSHL_015] fold 0: 6/6 models OK  m0=-0.6824, m1=-0.3955, m2_q=-0.1396, m2_b=-0.1096, m3_q=-0.1246, m3_b=-0.0914
-  [IBL-T1] fold 0: 6/6 models OK  m0=-0.6902, m1=-0.2672, m2_q=-0.1312, m2_b=-0.0763, m3_q=-0.1166, m3_b=-0.0719
-  [ibl_witten_13] fold 0: 6/6 models OK  m0=-0.6865, m1=-0.3059, m2_q=-0.1026, m2_b=-0.0981, m3_q=-0.0999, m3_b=-0.0978
-  [CSHL046] fold 1: 6/6 models OK  m0=-0.6856, m1=-0.3725, m2_q=-0.1439, m2_b=-0.1103, m3_q=-0.1304, m3_b=-0.1094
-[LIVE][CV] saved CSHL046: folds=2, mean_m1=-0.3818, mean_m2q=-0.1367
-CV fitting:  39%|███████████████████████████████████████████████▎                                                                        | 15/38 [38:08<20:45, 54.16s/it]  [NYU-09] fold 1: 6/6 models OK  m0=-0.6993, m1=-0.3468, m2_q=-0.1919, m2_b=-0.1218, m3_q=-0.1850, m3_b=-0.1209
-[LIVE][CV] saved NYU-09: folds=2, mean_m1=-0.3822, mean_m2q=-0.1884
-CV fitting:  42%|██████████████████████████████████████████████████▌                                                                     | 16/38 [38:50<18:32, 50.56s/it]  [ZM_1371] fold 1: 6/6 models OK  m0=-0.6942, m1=-0.2754, m2_q=-0.1298, m2_b=-0.1033, m3_q=-0.1154, m3_b=-0.0944
-  [ZM_1369] fold 1: 6/6 models OK  m0=-0.6949, m1=-0.3550, m2_q=-0.1408, m2_b=-0.1001, m3_q=-0.1141, m3_b=-0.0998
-[LIVE][CV] saved ZM_1371: folds=2, mean_m1=-0.2781, mean_m2q=-0.1219
-CV fitting:  45%|█████████████████████████████████████████████████████▋                                                                  | 17/38 [39:46<18:14, 52.11s/it][LIVE][CV] saved ZM_1369: folds=2, mean_m1=-0.3403, mean_m2q=-0.1525
-CV fitting:  47%|████████████████████████████████████████████████████████▊                                                               | 18/38 [39:51<12:37, 37.87s/it]  [ibl_witten_04] fold 0: 6/6 models OK  m0=-0.6940, m1=-0.3226, m2_q=-0.1346, m2_b=-0.0844, m3_q=-0.1244, m3_b=-0.0750
-  [IBL-T4] fold 1: 6/6 models OK  m0=-0.6960, m1=-0.2903, m2_q=-0.1344, m2_b=-0.0974, m3_q=-0.1362, m3_b=-0.0858
-[LIVE][CV] saved IBL-T4: folds=2, mean_m1=-0.3105, mean_m2q=-0.1485
-CV fitting:  50%|████████████████████████████████████████████████████████████                                                            | 19/38 [42:24<22:58, 72.54s/it]  [ibl_witten_14] fold 1: 6/6 models OK  m0=-0.6920, m1=-0.3203, m2_q=-0.1299, m2_b=-0.1097, m3_q=-0.1166, m3_b=-0.0945
-[LIVE][CV] saved ibl_witten_14: folds=2, mean_m1=-0.3109, mean_m2q=-0.1211
-CV fitting:  53%|███████████████████████████████████████████████████████████████▏                                                        | 20/38 [43:24<20:40, 68.93s/it]  [ZM_1372] fold 1: 6/6 models OK  m0=-0.6961, m1=-0.3545, m2_q=-0.0950, m2_b=-0.0799, m3_q=-0.0880, m3_b=-0.0713
-[LIVE][CV] saved ZM_1372: folds=2, mean_m1=-0.3314, mean_m2q=-0.1026
-CV fitting:  55%|██████████████████████████████████████████████████████████████████▎                                                     | 21/38 [43:46<15:29, 54.70s/it]  [ibl_witten_12] fold 0: 6/6 models OK  m0=-0.6934, m1=-0.2476, m2_q=-0.1279, m2_b=-0.1156, m3_q=-0.1081, m3_b=-0.0954
-  [SWC_030] fold 1: 6/6 models OK  m0=-0.6952, m1=-0.4661, m2_q=-0.1374, m2_b=-0.1186, m3_q=-0.1262, m3_b=-0.1199
-[LIVE][CV] saved SWC_030: folds=2, mean_m1=-0.4688, mean_m2q=-0.1358
-CV fitting:  58%|█████████████████████████████████████████████████████████████████████▍                                                  | 22/38 [45:20<17:43, 66.48s/it]  [NYU-25] fold 1: 6/6 models OK  m0=-0.6935, m1=-0.3824, m2_q=-0.1559, m2_b=-0.1019, m3_q=-0.1451, m3_b=-0.0998
-[LIVE][CV] saved NYU-25: folds=2, mean_m1=-0.4009, mean_m2q=-0.1746
-CV fitting:  61%|████████████████████████████████████████████████████████████████████████▋                                               | 23/38 [45:25<12:01, 48.12s/it]  [CSHL_003] fold 1: 6/6 models OK  m0=-0.6933, m1=-0.3224, m2_q=-0.0844, m2_b=-0.0777, m3_q=-0.0839, m3_b=-0.0683
-[LIVE][CV] saved CSHL_003: folds=2, mean_m1=-0.2995, mean_m2q=-0.0835
-CV fitting:  63%|███████████████████████████████████████████████████████████████████████████▊                                            | 24/38 [46:29<12:18, 52.77s/it]  [ibl_witten_07] fold 0: 6/6 models OK  m0=-0.6486, m1=-0.3468, m2_q=-0.1329, m2_b=-0.0922, m3_q=-0.1212, m3_b=-0.0795
-  [NYU-04] fold 0: 6/6 models OK  m0=-0.6908, m1=-0.2911, m2_q=-0.1022, m2_b=-0.0779, m3_q=-0.0942, m3_b=-0.0779
-  [ZM_1743] fold 1: 6/6 models OK  m0=-0.6923, m1=-0.3394, m2_q=-0.1226, m2_b=-0.0934, m3_q=-0.1132, m3_b=-0.0888
-[LIVE][CV] saved ZM_1743: folds=2, mean_m1=-0.3425, mean_m2q=-0.1258
-CV fitting:  66%|██████████████████████████████████████████████████████████████████████████████▉                                         | 25/38 [48:22<15:20, 70.78s/it]  [CSHL_002] fold 1: 6/6 models OK  m0=-0.6767, m1=-0.3033, m2_q=-0.1062, m2_b=-0.0581, m3_q=-0.0926, m3_b=-0.0580
-[LIVE][CV] saved CSHL_002: folds=2, mean_m1=-0.3148, mean_m2q=-0.1132
-CV fitting:  68%|██████████████████████████████████████████████████████████████████████████████████                                      | 26/38 [48:50<11:36, 58.07s/it]  [ZM_1745] fold 1: 6/6 models OK  m0=-0.6734, m1=-0.3083, m2_q=-0.1240, m2_b=-0.0953, m3_q=-0.1182, m3_b=-0.0861
-[LIVE][CV] saved ZM_1745: folds=2, mean_m1=-0.3173, mean_m2q=-0.1200
-CV fitting:  71%|█████████████████████████████████████████████████████████████████████████████████████▎                                  | 27/38 [49:23<09:17, 50.66s/it]  [NYU-02] fold 1: 6/6 models OK  m0=-0.6948, m1=-0.3794, m2_q=-0.1535, m2_b=-0.0755, m3_q=-0.1455, m3_b=-0.0725
-[LIVE][CV] saved NYU-02: folds=2, mean_m1=-0.3654, mean_m2q=-0.1524
-CV fitting:  74%|████████████████████████████████████████████████████████████████████████████████████████▍                               | 28/38 [49:55<07:29, 44.98s/it]  [CSHL_015] fold 1: 6/6 models OK  m0=-0.6898, m1=-0.3460, m2_q=-0.1171, m2_b=-0.1131, m3_q=-0.1240, m3_b=-0.1131
-  [IBL-T1] fold 1: 6/6 models OK  m0=-0.6905, m1=-0.2556, m2_q=-0.1187, m2_b=-0.0723, m3_q=-0.1152, m3_b=-0.0654
-[LIVE][CV] saved CSHL_015: folds=2, mean_m1=-0.3708, mean_m2q=-0.1283
-CV fitting:  76%|███████████████████████████████████████████████████████████████████████████████████████████▌                            | 29/38 [50:31<06:19, 42.21s/it][LIVE][CV] saved IBL-T1: folds=2, mean_m1=-0.2614, mean_m2q=-0.1250
-CV fitting:  79%|██████████████████████████████████████████████████████████████████████████████████████████████▋                         | 30/38 [50:35<04:06, 30.77s/it]  [ibl_witten_06] fold 0: 6/6 models OK  m0=-0.6931, m1=-0.3258, m2_q=-0.0784, m2_b=-0.0704, m3_q=-0.0782, m3_b=-0.0590
-  [CSHL_014] fold 1: 6/6 models OK  m0=-0.6943, m1=-0.3543, m2_q=-0.1380, m2_b=-0.1114, m3_q=-0.1256, m3_b=-0.1114
-[LIVE][CV] saved CSHL_014: folds=2, mean_m1=-0.3671, mean_m2q=-0.1282
-CV fitting:  82%|█████████████████████████████████████████████████████████████████████████████████████████████████▉                      | 31/38 [50:47<02:55, 25.10s/it]  [NYU-01] fold 1: 6/6 models OK  m0=-0.6862, m1=-0.3771, m2_q=-0.1472, m2_b=-0.0752, m3_q=-0.1327, m3_b=-0.0683
-[LIVE][CV] saved NYU-01: folds=2, mean_m1=-0.3875, mean_m2q=-0.1537
-CV fitting:  84%|█████████████████████████████████████████████████████████████████████████████████████████████████████                   | 32/38 [51:16<02:37, 26.30s/it]  [ibl_witten_13] fold 1: 6/6 models OK  m0=-0.6851, m1=-0.2983, m2_q=-0.1067, m2_b=-0.0964, m3_q=-0.0966, m3_b=-0.0804
-[LIVE][CV] saved ibl_witten_13: folds=2, mean_m1=-0.3021, mean_m2q=-0.1047
-CV fitting:  87%|████████████████████████████████████████████████████████████████████████████████████████████████████████▏               | 33/38 [51:30<01:52, 22.51s/it]  [ibl_witten_04] fold 1: 6/6 models OK  m0=-0.6864, m1=-0.3005, m2_q=-0.0997, m2_b=-0.0804, m3_q=-0.1063, m3_b=-0.0693
-[LIVE][CV] saved ibl_witten_04: folds=2, mean_m1=-0.3116, mean_m2q=-0.1172
-CV fitting:  89%|███████████████████████████████████████████████████████████████████████████████████████████████████████████▎            | 34/38 [53:09<03:02, 45.59s/it]  [ibl_witten_12] fold 1: 6/6 models OK  m0=-0.6925, m1=-0.2642, m2_q=-0.1298, m2_b=-0.1191, m3_q=-0.1225, m3_b=-0.1010
-[LIVE][CV] saved ibl_witten_12: folds=2, mean_m1=-0.2559, mean_m2q=-0.1288
-CV fitting:  92%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████▌         | 35/38 [53:42<02:05, 41.67s/it]  [ibl_witten_07] fold 1: 6/6 models OK  m0=-0.6773, m1=-0.3568, m2_q=-0.1120, m2_b=-0.0931, m3_q=-0.0891, m3_b=-0.0801
-[LIVE][CV] saved ibl_witten_07: folds=2, mean_m1=-0.3518, mean_m2q=-0.1224
-CV fitting:  95%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████▋      | 36/38 [55:23<01:59, 59.58s/it]  [NYU-04] fold 1: 6/6 models OK  m0=-0.6919, m1=-0.3055, m2_q=-0.0972, m2_b=-0.0833, m3_q=-0.0965, m3_b=-0.0818
-[LIVE][CV] saved NYU-04: folds=2, mean_m1=-0.2983, mean_m2q=-0.0997
-CV fitting:  97%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████▊   | 37/38 [55:39<00:46, 46.58s/it]  [ibl_witten_06] fold 1: 6/6 models OK  m0=-0.6923, m1=-0.3271, m2_q=-0.0915, m2_b=-0.0768, m3_q=-0.0813, m3_b=-0.0668
-[LIVE][CV] saved ibl_witten_06: folds=2, mean_m1=-0.3264, mean_m2q=-0.0850
-CV fitting: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 38/38 [56:34<00:00, 89.33s/it]
-
-Successfully analyzed 36 mice
-Full-session fitting:   0%|                                                                                                                       | 0/38 [00:00<?, ?it/s]  [ibl_witten_05] SKIP full: RL params hit boundary
-[LIVE][FULL] ibl_witten_05: skipped_or_failed
-Full-session fitting:   3%|██▉                                                                                                            | 1/38 [01:18<48:10, 78.13s/it]  [NYU-23] full: 55/55 sessions fitted
-[LIVE][FULL] saved NYU-23: sessions_fitted=55
-Full-session fitting:   5%|█████▊                                                                                                         | 2/38 [03:10<58:58, 98.28s/it]  [DY_011] full: 47/47 sessions fitted
-[LIVE][FULL] saved DY_011: sessions_fitted=47
-Full-session fitting:   8%|████████▊                                                                                                      | 3/38 [03:22<34:15, 58.73s/it]  [CSHL_008] full: 56/56 sessions fitted
-[LIVE][FULL] saved CSHL_008: sessions_fitted=56
-Full-session fitting:  11%|███████████▋                                                                                                   | 4/38 [03:33<22:35, 39.86s/it]  [CSHL_005] SKIP full: RL params hit boundary
-[LIVE][FULL] CSHL_005: skipped_or_failed
-Full-session fitting:  13%|██████████████▌                                                                                                | 5/38 [03:40<15:31, 28.23s/it]  [CSHL_007] full: 64/64 sessions fitted
-[LIVE][FULL] saved CSHL_007: sessions_fitted=64
-Full-session fitting:  16%|█████████████████▌                                                                                             | 6/38 [03:41<10:00, 18.77s/it]  [SWC_043] full: 42/42 sessions fitted
-[LIVE][FULL] saved SWC_043: sessions_fitted=42
-Full-session fitting:  18%|████████████████████▍                                                                                          | 7/38 [03:42<06:41, 12.97s/it]  [NYU-06] full: 43/43 sessions fitted
-[LIVE][FULL] saved NYU-06: sessions_fitted=43
-Full-session fitting:  21%|███████████████████████▎                                                                                       | 8/38 [03:48<05:25, 10.85s/it]  [CSHL_010] full: 56/56 sessions fitted
-[LIVE][FULL] saved CSHL_010: sessions_fitted=56
-Full-session fitting:  24%|██████████████████████████▎                                                                                    | 9/38 [04:00<05:26, 11.26s/it]  [IBL-T2] full: 44/44 sessions fitted
-[LIVE][FULL] saved IBL-T2: sessions_fitted=44
-Full-session fitting:  26%|████████████████████████████▉                                                                                 | 10/38 [04:01<03:48,  8.17s/it]  [ZM_1746] full: 40/40 sessions fitted
-[LIVE][FULL] saved ZM_1746: sessions_fitted=40
-Full-session fitting:  29%|███████████████████████████████▊                                                                              | 11/38 [04:06<03:07,  6.94s/it]  [SWC_021] full: 41/41 sessions fitted
-  [DY_010] full: 46/46 sessions fitted
-[LIVE][FULL] saved SWC_021: sessions_fitted=41
-Full-session fitting:  32%|██████████████████████████████████▋                                                                           | 12/38 [04:08<02:25,  5.58s/it]  [IBL-T3] full: 40/40 sessions fitted
-[LIVE][FULL] saved DY_010: sessions_fitted=46
-Full-session fitting:  34%|█████████████████████████████████████▋                                                                        | 13/38 [04:09<01:43,  4.13s/it][LIVE][FULL] saved IBL-T3: sessions_fitted=40
-Full-session fitting:  37%|████████████████████████████████████████▌                                                                     | 14/38 [04:10<01:15,  3.14s/it]  [NYU-09] full: 42/42 sessions fitted
-[LIVE][FULL] saved NYU-09: sessions_fitted=42
-Full-session fitting:  39%|███████████████████████████████████████████▍                                                                  | 15/38 [04:14<01:21,  3.56s/it]  [ZM_1371] full: 45/45 sessions fitted
-  [ZM_1369] full: 47/47 sessions fitted
-[LIVE][FULL] saved ZM_1371: sessions_fitted=45
-Full-session fitting:  42%|██████████████████████████████████████████████▎                                                               | 16/38 [04:28<02:22,  6.50s/it]  [CSHL046] full: 44/44 sessions fitted
-[LIVE][FULL] saved ZM_1369: sessions_fitted=47
-Full-session fitting:  45%|█████████████████████████████████████████████████▏                                                            | 17/38 [04:29<01:42,  4.86s/it]  [IBL-T4] full: 56/56 sessions fitted
-[LIVE][FULL] saved CSHL046: sessions_fitted=44
-Full-session fitting:  47%|████████████████████████████████████████████████████                                                          | 18/38 [04:30<01:14,  3.74s/it][LIVE][FULL] saved IBL-T4: sessions_fitted=56
-Full-session fitting:  50%|███████████████████████████████████████████████████████                                                       | 19/38 [04:31<00:56,  2.98s/it]  [SWC_030] full: 63/63 sessions fitted
-[LIVE][FULL] saved SWC_030: sessions_fitted=63
-Full-session fitting:  53%|█████████████████████████████████████████████████████████▉                                                    | 20/38 [04:46<02:00,  6.72s/it]  [ibl_witten_14] full: 51/51 sessions fitted
-  [ZM_1372] full: 45/45 sessions fitted
-[LIVE][FULL] saved ibl_witten_14: sessions_fitted=51
-Full-session fitting:  55%|████████████████████████████████████████████████████████████▊                                                 | 21/38 [04:54<01:59,  7.03s/it][LIVE][FULL] saved ZM_1372: sessions_fitted=45
-Full-session fitting:  58%|███████████████████████████████████████████████████████████████▋                                              | 22/38 [04:56<01:25,  5.35s/it]  [NYU-25] full: 62/62 sessions fitted
-[LIVE][FULL] saved NYU-25: sessions_fitted=62
-Full-session fitting:  61%|██████████████████████████████████████████████████████████████████▌                                           | 23/38 [05:08<01:53,  7.59s/it]  [CSHL_002] full: 48/48 sessions fitted
-[LIVE][FULL] saved CSHL_002: sessions_fitted=48
-Full-session fitting:  63%|█████████████████████████████████████████████████████████████████████▍                                        | 24/38 [05:10<01:22,  5.87s/it]  [CSHL_003] full: 59/59 sessions fitted
-[LIVE][FULL] saved CSHL_003: sessions_fitted=59
-Full-session fitting:  66%|████████████████████████████████████████████████████████████████████████▎                                     | 25/38 [05:23<01:41,  7.83s/it]  [ZM_1745] full: 56/56 sessions fitted
-[LIVE][FULL] saved ZM_1745: sessions_fitted=56
-Full-session fitting:  68%|███████████████████████████████████████████████████████████████████████████▎                                  | 26/38 [05:26<01:17,  6.42s/it]  [CSHL_015] full: 52/52 sessions fitted
-[LIVE][FULL] saved CSHL_015: sessions_fitted=52
-Full-session fitting:  71%|██████████████████████████████████████████████████████████████████████████████▏                               | 27/38 [05:46<01:57, 10.72s/it]  [IBL-T1] full: 60/60 sessions fitted
-  [CSHL_014] full: 58/58 sessions fitted
-[LIVE][FULL] saved IBL-T1: sessions_fitted=60
-Full-session fitting:  74%|█████████████████████████████████████████████████████████████████████████████████                             | 28/38 [05:55<01:41, 10.13s/it]  [NYU-02] full: 88/88 sessions fitted
-[LIVE][FULL] saved CSHL_014: sessions_fitted=58
-Full-session fitting:  76%|███████████████████████████████████████████████████████████████████████████████████▉                          | 29/38 [05:57<01:09,  7.71s/it][LIVE][FULL] saved NYU-02: sessions_fitted=88
-Full-session fitting:  79%|██████████████████████████████████████████████████████████████████████████████████████▊                       | 30/38 [05:59<00:48,  6.03s/it]  [ibl_witten_13] full: 52/52 sessions fitted
-[LIVE][FULL] saved ibl_witten_13: sessions_fitted=52
-Full-session fitting:  82%|█████████████████████████████████████████████████████████████████████████████████████████▋                    | 31/38 [06:03<00:36,  5.15s/it]  [ZM_1743] full: 62/62 sessions fitted
-[LIVE][FULL] saved ZM_1743: sessions_fitted=62
-Full-session fitting:  84%|████████████████████████████████████████████████████████████████████████████████████████████▋                 | 32/38 [06:13<00:40,  6.68s/it]  [NYU-01] full: 77/77 sessions fitted
-[LIVE][FULL] saved NYU-01: sessions_fitted=77
-Full-session fitting:  87%|███████████████████████████████████████████████████████████████████████████████████████████████▌              | 33/38 [06:44<01:10, 14.10s/it]  [ibl_witten_04] full: 61/61 sessions fitted
-[LIVE][FULL] saved ibl_witten_04: sessions_fitted=61
-Full-session fitting:  89%|██████████████████████████████████████████████████████████████████████████████████████████████████▍           | 34/38 [06:48<00:44, 11.16s/it]  [ibl_witten_12] full: 52/52 sessions fitted
-[LIVE][FULL] saved ibl_witten_12: sessions_fitted=52
-Full-session fitting:  92%|█████████████████████████████████████████████████████████████████████████████████████████████████████▎        | 35/38 [07:11<00:43, 14.64s/it]  [ibl_witten_07] full: 73/73 sessions fitted
-[LIVE][FULL] saved ibl_witten_07: sessions_fitted=73
-Full-session fitting:  95%|████████████████████████████████████████████████████████████████████████████████████████████████████████▏     | 36/38 [07:51<00:44, 22.28s/it]  [NYU-04] full: 81/81 sessions fitted
-[LIVE][FULL] saved NYU-04: sessions_fitted=81
-Full-session fitting:  97%|███████████████████████████████████████████████████████████████████████████████████████████████████████████   | 37/38 [08:14<00:22, 22.49s/it]  [ibl_witten_06] full: 82/82 sessions fitted
-[LIVE][FULL] saved ibl_witten_06: sessions_fitted=82
-Full-session fitting: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████| 38/38 [09:18<00:00, 14.69s/it]
-
+  M1 Raw Reward: ΔLL=+0.3450 bits/trial, 95% CI [+0.3316, +0.3579], SE=0.0073, N=36
+  M2-Q RPE: ΔLL=+0.5588 bits/trial, 95% CI [+0.5487, +0.5671], SE=0.0049, N=36
+  M2-B Belief: ΔLL=+0.5951 bits/trial, 95% CI [+0.5891, +0.6009], SE=0.0032, N=36
+  M3-Q Combined: ΔLL=+0.5702 bits/trial, 95% CI [+0.5616, +0.5776], SE=0.0043, N=36
+  M3-B Combined: ΔLL=+0.6008 bits/trial, 95% CI [+0.5951, +0.6067], SE=0.0029, N=36
 
 ======================================================================
 ANALYSIS 1 — Model Comparison: RPE vs Raw Reward Transitions
 ======================================================================
   N subjects: 36
-  Mean ΔLL (M2-Q − M1): +0.2142 bits/trial
-  95% Bootstrap CI: [+0.2018, +0.2305], SE=0.0074
+  Mean ΔLL (M2-Q − M1): +0.2138 bits/trial
+  95% Bootstrap CI: [+0.2027, +0.2264], SE=0.0065
   Wilcoxon stat=0.0, p=2.9104e-11, rank-biserial r=+1.000
-  Permutation p=nan (mode=circular_shift, n_perm=0)
   Direction: RPE > Raw Reward
 [LIVE][ANALYSIS] saved analysis_1.json
 
@@ -253,8 +21,8 @@ ANALYSIS 1 — Model Comparison: RPE vs Raw Reward Transitions
 ANALYSIS 1b — Belief-state vs Q-learning RPE (M2 variants)
 ======================================================================
   N subjects: 36
-  Mean ΔLL (Belief − Q): +0.0348 bits/trial
-  95% Bootstrap CI: [+0.0270, +0.0421], SE=0.0036
+  Mean ΔLL (Belief − Q): +0.0363 bits/trial
+  95% Bootstrap CI: [+0.0293, +0.0437], SE=0.0039
   Wilcoxon stat=0.0, p=2.9104e-11, rank-biserial r=+1.000
   Direction: Belief > Q
 [LIVE][ANALYSIS] saved analysis_1b.json
@@ -262,46 +30,40 @@ ANALYSIS 1b — Belief-state vs Q-learning RPE (M2 variants)
 ======================================================================
 ANALYSIS 2 — RPE Signatures at Motivational State Transitions
 ======================================================================
-  Transition weight formats: 3D=0, 2D=1990, skipped=1450
+  Sessions contributing: 1990
 
   Engaged → Disengaged:
-    cumpos: mean=-0.1290, 95% CI [-0.2299, -0.0156], SE=0.0546, excludes 0: YES
-    cumneg: mean=-0.0006, 95% CI [-0.1329, +0.1269], SE=0.0672, excludes 0: no
-    abs_running: mean=+0.0771, 95% CI [-0.0420, +0.1782], SE=0.0560, excludes 0: no
-    current: mean=-2.4036, 95% CI [-2.8961, -1.9175], SE=0.2539, excludes 0: YES
+    n_events=52244
+    cumpos: mean=-0.1364, 95% CI [-0.1439, -0.1286], SE=0.0035, excludes 0: YES
+    cumneg: mean=-1.1920, 95% CI [-1.1982, -1.1850], SE=0.0036, excludes 0: YES
+    abs_running: mean=+0.4507, 95% CI [+0.4429, +0.4582], SE=0.0039, excludes 0: YES
+    current: mean=-1.5907, 95% CI [-1.5980, -1.5837], SE=0.0037, excludes 0: YES
 
   Disengaged → Engaged:
-    cumpos: mean=+0.7325, 95% CI [+0.5225, +0.9403], SE=0.1194, excludes 0: YES
-    cumneg: mean=+2.8913, 95% CI [+2.6501, +3.1235], SE=0.1225, excludes 0: YES
-    abs_running: mean=-0.2853, 95% CI [-0.4484, -0.1186], SE=0.0870, excludes 0: YES
-    current: mean=+13.4767, 95% CI [+12.5733, +14.5551], SE=0.5122, excludes 0: YES
+    n_events=52342
+    cumpos: mean=+0.3947, 95% CI [+0.3861, +0.4019], SE=0.0040, excludes 0: YES
+    cumneg: mean=-0.6805, 95% CI [-0.6863, -0.6737], SE=0.0033, excludes 0: YES
+    abs_running: mean=+0.4989, 95% CI [+0.4914, +0.5063], SE=0.0038, excludes 0: YES
+    current: mean=+0.9927, 95% CI [+0.9848, +1.0003], SE=0.0038, excludes 0: YES
 [LIVE][ANALYSIS] saved analysis_2.json
 
 ======================================================================
 ANALYSIS 3 — Individual Differences: Learning Rate vs State Stability
 ======================================================================
   N subjects: 36
-  Spearman ρ (α⁺ vs mean dwell): -0.063
-  p-value: 7.1705e-01
-  ρ² (variance explained): 0.004
+  Spearman ρ (α⁺ vs mean dwell): -0.370
+  p-value: 2.6279e-02
+  ρ² (variance explained): 0.137
   Mean engaged dwell: 5.5 trials
   Association: negative
 [LIVE][ANALYSIS] saved analysis_3.json
 
 ======================================================================
-ANALYSIS 4 — Block Boundary Analysis
-======================================================================
-  Block boundaries found: 25182
-  Mean RPE at boundary: +0.1052
-  One-sample t-test vs 0: t=25.684, p=1.2489e-143
-  P(engaged) pre: 0.201
-  P(engaged) post: 0.199
-  ΔP(engaged): -0.002
-[LIVE][ANALYSIS] saved analysis_4.json
-
-======================================================================
 ANALYSIS COMPLETE
 ======================================================================
+Outputs saved to: /home/khafez/janhaf2n/glm-hmm-rpe/rpe_hmm/outputs
+  baseline_model_deltas.csv
+  baseline_model_deltas.json
   fig1_model_comparison.png
   fig2_transition_weights.png
   fig3_individual_differences.png
@@ -309,3 +71,4 @@ ANALYSIS COMPLETE
   live
   results.json
   summary.csv
+  terminal_output.txt

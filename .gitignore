@@ -1,5 +1,5 @@
 rpe_hmm/__pycache__/
-rpe_hmm/diag.ipynb
+rpe_hmm/diag_*.ipynb
 rpe_hmm/outputs/live/
 rpe_hmm/original_paper.txt
 myenv/

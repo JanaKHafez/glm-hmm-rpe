@@ -13,8 +13,9 @@ The current entry point is `run_rpe_hmm.py`.
 3. derives Q-based and belief-based RPE regressors,
 4. fits multiple GLM-HMM transition models using `ssm.HMM_TO`,
 5. compares held-out log-likelihood across models,
-6. fits full-session `M2-Q` models for state-sequence and transition-weight summaries,
-7. saves summary tables, figures, and JSON outputs.
+6. prints and saves log-likelihood differences between each model and the `L0` baseline,
+7. fits full-session `M2-Q` models for state-sequence summaries,
+8. saves summary tables, figures, and JSON outputs.
 
 ## Current model set
 
@@ -36,8 +37,7 @@ All models share the same observation model and differ only in the transition re
 - per-subject held-out $\Delta LL = LL(M2\text{-}Q) - LL(M1)$,
 - Wilcoxon signed-rank test,
 - rank-biserial effect size,
-- bootstrap confidence interval for the mean difference,
-- optional permutation null test.
+- bootstrap confidence interval for the mean difference.
 
 ### 1b. Model comparison: `M2-Belief` vs `M2-Q`
 
@@ -46,22 +46,28 @@ All models share the same observation model and differ only in the transition re
 - rank-biserial effect size,
 - bootstrap confidence interval.
 
-### 2. Transition-weight summary
+### Baseline comparison summary
 
-Using full-session `M2-Q` fits, the script summarizes RPE-linked transition weights for:
+Before the main inferential analyses, the script prints and saves per-model:
+
+- $\Delta LL = LL(\text{model}) - LL(L0)$,
+- bootstrap confidence interval for the mean difference,
+- bootstrap SE.
+
+Saved outputs include `baseline_model_deltas.csv` and `baseline_model_deltas.json`.
+
+### 2. Transition-event summary
+
+Using full-session `M2-Q` fits, the script summarizes RPE-linked regressors at realized Viterbi state switches for:
 
 - engaged $\rightarrow$ disengaged,
 - disengaged $\rightarrow$ engaged.
 
+The reported quantities are the mean regressor values at those transition events, with bootstrap confidence intervals.
+
 ### 3. Individual-differences summary
 
 - Spearman correlation between `alpha_pos` and mean engaged-state dwell time.
-
-### 4. Block-boundary summary
-
-- peri-boundary RPE average,
-- one-sample $t$-test of boundary RPE against $0$,
-- pre/post engaged-state occupancy around block switches.
 
 ## Requirements
 
@@ -139,11 +145,6 @@ TAU_FILTER = 4.0
 
 # Statistics
 BOOTSTRAP_N = 200
-N_PERMUTATIONS = 20
-NULL_MODE = "circular_shift"
-
-# Block analysis
-BOUNDARY_WINDOW = 20
 
 # Scope / compute
 N_MICE = None
@@ -157,11 +158,12 @@ After a run, the script typically writes:
 | File | Description |
 |---|---|
 | `summary.csv` | Per-mouse summary of held-out log-likelihood and RL parameters |
+| `baseline_model_deltas.csv` | Mean $\Delta LL$ of each model versus `L0`, with bootstrap CI/SE |
+| `baseline_model_deltas.json` | JSON version of the baseline-delta summary |
 | `results.json` | Main analysis results bundle |
 | `fig1_model_comparison.png` | Model comparison boxplot and $\Delta LL$ histogram |
-| `fig2_transition_weights.png` | Transition-weight summary figure |
+| `fig2_transition_weights.png` | Event-based RPE transition summary figure |
 | `fig3_individual_differences.png` | `alpha_pos` vs dwell-time scatter |
-| `fig4_block_boundaries.png` | Peri-boundary RPE and engagement figure, when boundaries are available |
 | `live/cv_mouse_*.json` | Per-mouse incremental CV outputs |
 | `live/full_mouse_*.json` | Per-mouse incremental full-session outputs |
 | `live/analysis_*.json` | Incremental analysis-stage outputs |
