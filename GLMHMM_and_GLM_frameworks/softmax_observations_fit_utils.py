@@ -4,6 +4,7 @@ Assorted auxiliary functions for fitting the models
 
 """
 import autograd.numpy as np
+import numpy as onp
 
 import ssm
 from autograd.scipy.special import logsumexp
@@ -39,6 +40,8 @@ def model_data_glmhmm(data_file):
     data = [container[key] for key in container]
     this_Params_model = data[0]
     lls = data[1]
+    if isinstance(this_Params_model, np.ndarray) and this_Params_model.dtype == object:
+        this_Params_model = this_Params_model.tolist()
     return [this_Params_model, lls]
 
 
@@ -112,14 +115,15 @@ def fit_hmm_observations(datas, inputs, inputs_trans, train_masks, K, D, M, M_tr
         sys.stdout.flush()
 
     else:
-        Wk_glob = copy.deepcopy(params_for_initialization[2])
         this_hmm = ssm.HMM_TO(K, D, M_trans=M_trans, M_obs=M, observations="input_driven_obs_diff_inputs",
                               observation_kwargs=dict(C=C, prior_sigma=prior_sigma),
                               transitions="inputdrivenalt",
                               transition_kwargs=dict(prior_sigma=prior_sigma, alpha=transition_alpha, kappa=0))
 
-        # Initialize HMM-GLM with global parameters:
-        this_hmm.params = copy.deepcopy(params_for_initialization)
+        # Initialize HMM-GLM with provided parameters (e.g., global-fit optimum model).
+        # If params are missing (None), we fall back to the constructor's default/random initialization.
+        if params_for_initialization is not None:
+            this_hmm.params = copy.deepcopy(params_for_initialization)
 
 
     if GLM_T_init_0 is True:
@@ -127,11 +131,21 @@ def fit_hmm_observations(datas, inputs, inputs_trans, train_masks, K, D, M, M_tr
 
     print("=== fitting HMM ========")
     # sys.stdout.flush()
-    lls = this_hmm.fit(datas, transition_input=inputs_trans, observation_input=inputs, train_masks=train_masks,
-                       method="em", num_iters=num_iters_EM_fit, initialize=False, tolerance=10 ** -4)
+    initialize = False
+    if (global_fit is False) and (params_for_initialization is None):
+        print("WARNING: No initialization params provided; letting ssm initialize parameters.")
+        initialize = True
 
-    # Save raw parameters of HMM, as well as loglikelihood and accuracy calculated during training
-    np.savez(save_title, this_hmm.params, lls)
+    lls = this_hmm.fit(datas, transition_input=inputs_trans, observation_input=inputs, train_masks=train_masks,
+                       method="em", num_iters=num_iters_EM_fit, initialize=initialize, tolerance=10 ** -4)
+
+    # Save raw parameters of HMM, as well as loglikelihood and accuracy calculated during training.
+    # `this_hmm.params` can be a ragged Python list (e.g., when we rely on default/random init).
+    # IMPORTANT: use *standard* NumPy here; autograd.numpy's array wrapper will still try to coerce
+    # ragged structures into numeric ndarrays and can raise.
+    params_to_save = onp.array(this_hmm.params, dtype=object)
+    lls_to_save = onp.asarray(lls)
+    onp.savez(save_title, params_to_save, lls_to_save)
     return None
 
 

@@ -9,6 +9,7 @@ import autograd.numpy as np
 import autograd.numpy.random as npr
 import sys
 import os
+from pathlib import Path
 
 sys.path.append("../")
 from utils_for_GLM import load_fold_session_map, get_mouse_info, fit_glm, regressors_weights_Figure, add_zero_column
@@ -23,9 +24,9 @@ if __name__ == '__main__':
 
     npr.seed(0)
     # Use all pooled IBL data for fitting the model
-    path_data = '../../glm-hmm_package/data/ibl/Della_cluster_data/'
-    path_main_folder = '../../glm-hmm_package/results/model_global_ibl/' \
-                  + 'num_regress_obs_' + str(num_inputs) + '/'
+    repo_root = Path(__file__).resolve().parent.parent
+    path_data = str(repo_root / 'data' / 'ibl' / 'Della_cluster_data') + '/'
+    path_main_folder = str(repo_root / 'results' / 'model_global_ibl' / f'num_regress_obs_{num_inputs}') + '/'
 
     mouse_data = path_data + 'combined_all_mice.npz'
     fold_mapping_session = load_fold_session_map(path_data + 'fold_mapping_session_all_mice.npz')

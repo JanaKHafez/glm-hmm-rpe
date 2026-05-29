@@ -420,6 +420,10 @@ def model_data_glmhmm(data_file):
     data = [container[key] for key in container]
     this_Params_model = data[0]
     lls = data[1]
+    # Newer saves may store params as a ragged object ndarray; convert back to a Python structure
+    # expected by `ssm` (list/tuple of arrays).
+    if isinstance(this_Params_model, np.ndarray) and this_Params_model.dtype == object:
+        this_Params_model = this_Params_model.tolist()
     return [this_Params_model, lls]
 
 
@@ -545,6 +549,9 @@ def log_likelihood_for_test_glmhmm(globe, prior_sigma, glm_hmm_dir, test_datas, 
     """
     this_file_name = glm_hmm_dir + 'iter_*/glm_hmm_raw_parameters_*.npz'
     params_and_LLs = glob.glob(this_file_name, recursive=True)
+    if len(params_and_LLs) == 0:
+        # Missing fits for this K/fold (common when only a subset of models have been trained).
+        return np.array([]), [], np.array([])
     train_ll_vals_across_iters = []
     test_ll_vals_across_iters = []
 
@@ -559,11 +566,6 @@ def log_likelihood_for_test_glmhmm(globe, prior_sigma, glm_hmm_dir, test_datas, 
                                   observation_kwargs=dict(C=C, prior_sigma=prior_sigma),
                                   transitions="inputdrivenalt", transition_kwargs=dict(alpha=1, kappa=0))
         else:
-            num_inputs = 4
-            path_data = "../../glm-hmm_package/data/ibl/Della_cluster_data/"
-            needed_info_for_init = path_data + 'optimum_model/optimum_model_K_' + str(K) + '_num_inputs_' + str(num_inputs) + '.npz'
-            params_for_initialization = get_params_global_fit(needed_info_for_init)
-            Wk_glob = copy.deepcopy(params_for_initialization[2])
             this_hmm = ssm.HMM_TO(K, D, M_trans=M_trans, M_obs=M, observations="input_driven_obs_diff_inputs",
                                   observation_kwargs=dict(C=C, prior_sigma=prior_sigma),
                                   transitions="inputdrivenalt",
@@ -624,6 +626,9 @@ def glmhmm_normalized_loglikelihood(globe, prior_sigma, obs_mat, trans_mat, y, s
     test_ll_vals_across_iters, train_for_arranging_initials, file_ordering_by_train = log_likelihood_for_test_glmhmm(
         globe, prior_sigma, dir_to_check, test_datas, test_inputs, test_inputs_trans, test_nonviolation_masks, K, D, M,
         M_trans, C)
+    if test_ll_vals_across_iters.size == 0:
+        # No trained model found for this K/fold.
+        return np.nan, np.nan, np.nan, np.nan, []
     train_ll_vals_across_iters, _, _ = log_likelihood_for_test_glmhmm(
         globe, prior_sigma, dir_to_check, train_datas, train_inputs, train_inputs_trans, train_nonviolation_masks, K, D,
         M, M_trans, C)

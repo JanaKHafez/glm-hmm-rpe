@@ -1,34 +1,30 @@
+"""Downloading IBL subjectTrials tables.
+
+This repo's preprocessing scripts expect parquet tables to exist under:
+    data/ibl/tables_new/
+
+Using ONE.load_aggregate without specifying a revision/tag can fail for some
+subjects (e.g., "No default revision"). Instead, we download the specific
+release tag directly from AWS.
 """
 
-Downloading IBL data in a correct format
-
-"""
+from pathlib import Path
 
 from one.api import ONE
 
-# Please use the Alyx password or other information if needed from 'one_params' at this link: https://int-brain-lab.github.io/iblenv/_modules/oneibl/params.html
-# For example, the Alyx password is international. For any other issues or problems, please feel free to contact IBL.
-one = ONE(base_url='https://openalyx.internationalbrainlab.org', password='international')
-datasets = one.alyx.rest('datasets', 'list', tag='2023_Q1_Mohammadi_et_al')
-subjects = [d['file_records'][0]['relative_path'].split('/')[2] for d in datasets]
-
-for subject in subjects:
-    trials = one.load_aggregate('subjects', subject, '_ibl_subjectTrials.table')
+from data_utils import download_subjectTrials
 
 
+if __name__ == "__main__":
+    tag = "2023_Q1_Mohammadi_et_al"
+    target_path = Path(__file__).resolve().parent / "tables_new"
+    target_path.mkdir(parents=True, exist_ok=True)
 
+    # Please use the Alyx password or other information if needed from 'one_params' at this link:
+    # https://int-brain-lab.github.io/iblenv/_modules/oneibl/params.html
+    # For example, the Alyx password is international.
+    one = ONE(base_url="https://openalyx.internationalbrainlab.org", password="international")
 
-# ========= Below you can find another way to download the data. =========#
-
-# import pandas as pd
-# from one.api import ONE
-# from data_utils import download_subjectTrials
-#
-# # use the function to download the data
-# one = ONE(base_url='https://openalyx.internationalbrainlab.org')
-# pqt_paths = download_subjectTrials(one)
-#
-# # load the data
-# df = pd.read_parquet(pqt_paths[0])
-# print(df)
+    out_paths = download_subjectTrials(one, target_path=target_path, tag=tag, overwrite=False, check_updates=True)
+    print(f"Downloaded {len(out_paths)} parquet tables into: {target_path}")
 

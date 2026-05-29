@@ -5,6 +5,7 @@ Fit the individual GLM-HMM to each mouse's data separately in the decision-makin
 """
 import autograd.numpy as np
 import sys
+from pathlib import Path
 from utils_for_GLMHMM import get_cluster_info, load_fold_session_map, get_mouse_info, mice_names_info, \
     mask_for_violations, glm_hmm_fit_data
 
@@ -25,20 +26,19 @@ if __name__ == '__main__':
         num_inputs = 4
         prior_sigma = 4.0
         transition_alpha = 2.0
-        base_dir = '../../glm-hmm_package/results/model_indiv_ibl/'
-        path_data = '../../glm-hmm_package/data/ibl/Della_cluster_data/'
+        repo_root = Path(__file__).resolve().parent.parent
+        base_dir = str(repo_root / 'results' / 'model_indiv_ibl') + '/'
+        path_data = str(repo_root / 'data' / 'ibl' / 'Della_cluster_data') + '/'
 
     elif cluster is True:
         z = int(sys.argv[1])
         base_dir = '/home/../glm-hmm_all_data_GLM_trans_diff_inputs/results/model_indiv_ibl/'
         path_data = '/home/../glm-hmm_all_data_GLM_trans_diff_inputs/data/ibl/Della_cluster_data/'
 
-    # Load external files:
-    info_cluster_file = path_data + 'separate_mouse_data/cluster_job_arr.npz'
-    # Load cluster array job parameters:
-    info_cluster = get_cluster_info(info_cluster_file)
-
     if cluster is True:
+        # Load cluster array job parameters (created by Della_cluster_prep.py):
+        info_cluster_file = path_data + 'separate_mouse_data/cluster_job_arr.npz'
+        info_cluster = get_cluster_info(info_cluster_file)
         [prior_sigma, transition_alpha, K, num_inputs, fold, iter] = info_cluster[z]
 
     iter = int(iter)

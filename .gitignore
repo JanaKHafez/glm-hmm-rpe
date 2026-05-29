@@ -1,0 +1,17 @@
+rpe_hmm/__pycache__/
+rpe_hmm/diag.ipynb
+rpe_hmm/outputs/live/
+rpe_hmm/original_paper.txt
+myenv/
+2_myenv/
+GLMHMM_and_GLM_frameworks/__pycache__/
+after_fitting_evaluation_scripts_ibl/__pycache__/
+data/ibl/Della_cluster_data/
+data/ibl/__pycache__/
+data/ibl/mice_names.npz
+data/ibl/mice_pqt_files.json
+data/ibl/mice_session_eids.json
+data/ibl/tables_new/
+data/ibl/response_times/
+results/
+ssm/

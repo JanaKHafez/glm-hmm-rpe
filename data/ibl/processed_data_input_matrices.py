@@ -14,19 +14,31 @@ from collections import defaultdict
 from sklearn import preprocessing
 from data_utils import mice_names_info, mask_for_violations, data_segmentation_session, tables_ibl_data, session_unnorm_values, \
     calculate_condition_number, mouse_eids_sessions_info, divide_sessions_for_test_train 
+from pathlib import Path
 npr.seed(65)
 
 if __name__ == '__main__':
     num_sess_considered = 0
     min_sess_count = 40  # Require that each mouse has at least 40 sessions
 
-    path_data = os.getcwd() + '/Della_cluster_data/'
-    path_of_the_directory = '../../glm-hmm_package/data/ibl/tables_new/'
+    base_dir = Path(__file__).resolve().parent
+    path_data_dir = base_dir / 'Della_cluster_data'
+    (path_data_dir / 'separate_mouse_data').mkdir(parents=True, exist_ok=True)
+    path_data = str(path_data_dir) + '/'
+
+    tables_dir = base_dir / 'tables_new'
+
+    # Backward/forward compatible: try to load a mapping from mouse -> parquet file path(s)
+    mice_pqt_files = {}
+    pqt_map_path = base_dir / 'mice_pqt_files.json'
+    if pqt_map_path.exists():
+        with open(pqt_map_path, 'r') as f:
+            mice_pqt_files = json.load(f)
 
     # Load mouse list:
-    mice_names = mice_names_info(os.getcwd() + '/mice_names.npz')
+    mice_names = mice_names_info(str(base_dir / 'mice_names.npz'))
     # Load mouse-eid dict (keys are mice and vals are list of eids for biased block sessions)
-    mice_session_eids = mouse_eids_sessions_info(os.getcwd() + '/mice_session_eids.json')
+    mice_session_eids = mouse_eids_sessions_info(str(base_dir / 'mice_session_eids.json'))
 
     for mouse in mice_names:
         sess_count = len(mice_session_eids[mouse])
@@ -42,7 +54,27 @@ if __name__ == '__main__':
     # WORKHORSE: iterate through each mouse and each mouse's set of eids; obtain unnorm data.  Write out each mouse's data and then also write to all_data array
     for z, mouse in enumerate(mice_names):
         print('z=', z)
-        mouse_path = path_of_the_directory + mouse
+
+        # Locate this mouse's parquet table file
+        mouse_pqt_path = None
+        if mouse in mice_pqt_files:
+            # mapping values can be a string or a list of strings
+            val = mice_pqt_files[mouse]
+            if isinstance(val, list) and len(val) > 0:
+                mouse_pqt_path = val[0]
+            elif isinstance(val, str) and len(val) > 0:
+                mouse_pqt_path = val
+
+        if mouse_pqt_path is None:
+            # Fall back to searching the tables directory
+            candidates = list(tables_dir.rglob(f'{mouse}/_ibl_subjectTrials.table*.pqt'))
+            if len(candidates) == 0:
+                raise FileNotFoundError(
+                    f'Could not find parquet table for mouse={mouse}. Looked under: {tables_dir}'
+                )
+            mouse_pqt_path = str(sorted(candidates)[0])
+
+        mouse_path = mouse_pqt_path
         sess_counter = 0
         for eid in mice_session_eids[mouse]:  # for each eid of the mouse
             mouse, eid_sess, left_contrast, right_contrast, reward_succ, choice, probability_stim = tables_ibl_data(eid,
@@ -165,17 +197,17 @@ if __name__ == '__main__':
         output_sess[np.where(output_sess == -1), :] = 1
         inputs_sess, inputs_trans_sess, datas_sess, train_masks_sess = data_segmentation_session(obs_mat, trans_mat,
                                                                                                  output_sess, mask, session)
-        for i in range(np.array(inputs_sess).shape[0]):
-            all_sess_size.append(np.array(inputs_sess[i]).shape)
+        for sess_inputs in inputs_sess:
+            all_sess_size.append(np.array(sess_inputs).shape)
     assert counter == all_data_obs_mat.shape[0]
 
-# plot covariates and save figures
-Len = 700
-path_analysis = '../../glm-hmm_package/results/' + 'covariates/'
-if not os.path.exists(path_analysis):
-    os.makedirs(path_analysis)
+    # plot covariates and save figures
+    Len = 700
+    repo_root = base_dir.parent.parent
+    path_analysis = str(repo_root / 'results' / 'covariates') + '/'
+    os.makedirs(path_analysis, exist_ok=True)
 
-print('all_data_trans_mat.shape=', all_data_trans_mat.shape)
+    print('all_data_trans_mat.shape=', all_data_trans_mat.shape)
 
 #========== plot inputs ===========
 # for i in range (5):

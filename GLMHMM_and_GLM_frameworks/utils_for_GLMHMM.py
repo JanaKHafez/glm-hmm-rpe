@@ -43,6 +43,14 @@ def get_old_ibl_data(mouse_data):
 
 
 def get_cluster_info(info_cluster_file):
+    if not os.path.exists(info_cluster_file):
+        raise FileNotFoundError(
+            f"Cluster info file not found: {info_cluster_file}\n"
+            "This file is only required when running with cluster=True. "
+            "If you are running locally, keep cluster=False (and the script should not try to load this file). "
+            "If you are running on a cluster, generate it first (see the README note about running Della_cluster_prep.py)."
+        )
+
     container = np.load(info_cluster_file, allow_pickle=True)
     data = [container[key] for key in container]
     info_cluster = data[0]
@@ -67,6 +75,19 @@ def get_params_global_fit(global_params_file):
 
 
 def get_params_global_fit_old_ibl(global_params_file):
+    if not os.path.exists(global_params_file):
+        # For local runs, users may not have generated the global-fit optimum model file.
+        # Returning None allows downstream code to fall back to default/random initialization.
+        print(
+            "WARNING: Global-fit initialization file not found; falling back to default initialization.\n"
+            f"Missing file: {global_params_file}\n"
+            "To reproduce the original initialization behavior, generate this file via the global-fit pipeline\n"
+            "(e.g., run the global GLM-HMM fits and then `after_fitting_evaluation_scripts_ibl/determine_optimal_model_global.py`\n"
+            "after updating its paths to this repo)."
+        )
+        sys.stdout.flush()
+        return None
+
     container = np.load(global_params_file, allow_pickle=True)
     data = [container[key] for key in container]
     global_params = data[0]

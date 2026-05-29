@@ -5,6 +5,7 @@ Fit the global GLM-HMM to all pooled IBL data from all mice in the decision-maki
 """
 import autograd.numpy as np
 import sys
+from pathlib import Path
 from utils_for_GLMHMM import get_cluster_info, load_fold_session_map, get_mouse_info, mask_for_violations, \
     glm_hmm_fit_data
 
@@ -39,9 +40,9 @@ if __name__ == '__main__':
         num_inputs = 4
         prior_sigma = 4.0
         transition_alpha = 2.0
-        path_data = '../../glm-hmm_package/data/ibl/Della_cluster_data/'
-        path_main_folder = '../../glm-hmm_package/results/model_global_ibl/' + 'num_regress_obs_' + str(
-            num_inputs) + '/'
+        repo_root = Path(__file__).resolve().parent.parent
+        path_data = str(repo_root / 'data' / 'ibl' / 'Della_cluster_data') + '/'
+        path_main_folder = str(repo_root / 'results' / 'model_global_ibl' / f'num_regress_obs_{num_inputs}') + '/'
 
     # Load external files:
     # fold = int(fold)

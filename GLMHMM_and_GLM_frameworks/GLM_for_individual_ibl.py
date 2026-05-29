@@ -8,6 +8,7 @@ import autograd.numpy as np
 import autograd.numpy.random as npr
 import sys
 import os
+from pathlib import Path
 sys.path.append("/")
 npr.seed(10)
 
@@ -22,7 +23,8 @@ if __name__ == '__main__':
     transition_alphas = [2.0]
     prior_sigmas = [4.0] #[0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]
 
-    path_data = '../../glm-hmm_package/data/ibl/Della_cluster_data/separate_mouse_data/'
+    repo_root = Path(__file__).resolve().parent.parent
+    path_data = str(repo_root / 'data' / 'ibl' / 'Della_cluster_data' / 'separate_mouse_data') + '/'
     mice_names = mice_names_info(path_data + 'mice_names.npz')
 
     for prior_sigma in prior_sigmas:
@@ -33,8 +35,10 @@ if __name__ == '__main__':
                 fold_mapping_session = load_fold_session_map(path_data + animal + '_fold_session_map.npz')
 
                 for fold in range(cross_valid_num_fold):
-                    path_main_folder = '../../glm-hmm_package/results/model_indiv_ibl/' + 'num_regress_obs_' + str(
-                        num_inputs) + '/prior_sigma_' + str(prior_sigma) + '_transition_alpha_' + str(transition_alpha) + '/' + animal + '/'
+                    path_main_folder = str(
+                        repo_root / 'results' / 'model_indiv_ibl' / f'num_regress_obs_{num_inputs}' /
+                        f'prior_sigma_{prior_sigma}_transition_alpha_{transition_alpha}' / animal
+                    ) + '/'
 
                     # get the appropriate data
                     obs_mat, trans_mat, y, session = get_mouse_info(mouse_data)

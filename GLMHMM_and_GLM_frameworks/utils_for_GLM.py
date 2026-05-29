@@ -211,10 +211,10 @@ def regressors_weights_Figure(Ws, standard_deviation, figure_directory, title='t
             plt.plot(range(-1, M + 2), np.repeat(0, M + 3), 'k', alpha=0.2)
             plt.axhline(y=0, color="k", alpha=0.5, ls="--")
             if len(figure_covariates_names) > 0:
-                plt.xticks(list(range(0, len(figure_covariates_names))), figure_covariates_names, rotation='90',
+                plt.xticks(list(range(0, len(figure_covariates_names))), figure_covariates_names, rotation=90,
                            fontsize=12)
             else:
-                plt.xticks(list(range(0, 3)), ['Stimulus', 'Past Choice', 'Bias'], rotation='90', fontsize=12)
+                plt.xticks(list(range(0, 3)), ['Stimulus', 'Past Choice', 'Bias'], rotation=90, fontsize=12)
             plt.ylim((-3, 6))
 
     fig.text(0.04, 0.5, "Weight", ha="center", va="center", rotation=90, fontsize=15)

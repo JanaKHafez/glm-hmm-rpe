@@ -191,8 +191,18 @@ def makeRaisedCosBasis(bias_num):
     return cosBasis, tgrid, basisPeaks
 
 def mouse_identifier(eid_path):
-    mouse = str(eid_path).split('tables_new/')[1]
-    return mouse
+    # The downloaded parquet tables are stored as:
+    #   .../tables_new/Subjects/<lab>/<subject>/_ibl_subjectTrials.table.<uuid>.pqt
+    # We use the subject folder name (e.g., DY_011) as the mouse identifier.
+    p = Path(eid_path)
+    if p.suffix == '.pqt' and p.parent.name:
+        return p.parent.name
+    # Fallback for unexpected path formats
+    s = str(eid_path)
+    if 'tables_new/' in s:
+        tail = s.split('tables_new/', 1)[1]
+        return tail.split('/', 1)[0]
+    return p.stem
 
 
 
@@ -283,7 +293,7 @@ def stimulus_side_regressor(past_decision, success, adapt_indexes):
 
 def tables_ibl_data(eid, path_that_mouse):
     eid_sess = eid
-    mouse = path_that_mouse.split('tables_new/')[1]
+    mouse = Path(path_that_mouse).parent.name
     df_trials = pd.read_parquet(path_that_mouse)
     session_trials = df_trials[df_trials['session'] == eid]
     decision = session_trials['choice']._values

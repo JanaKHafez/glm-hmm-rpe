@@ -12,7 +12,7 @@ import json
 import os
 import pandas as pd
 from collections import defaultdict
-from one.api import ONE
+from pathlib import Path
 from data_utils import mouse_identifier
 
 npr.seed(65)
@@ -25,9 +25,11 @@ if __name__ == '__main__':
     num_3 = 0
     mice_names = []  # to include animals names
 
-    one = ONE(base_url='https://alyx.internationalbrainlab.org')
+    # Map mouse (subject) name -> parquet file path(s)
+    mice_pqt_files = defaultdict(list)
+
     mice_session_eids = defaultdict(list)  # eids based on the subjects (mice IDs)
-    path = '../../glm-hmm_package/data/ibl/tables_new'
+    path = Path(__file__).resolve().parent / 'tables_new'
 
     for dirname, dirs, files in os.walk(path):
         for filename in files:
@@ -39,6 +41,10 @@ if __name__ == '__main__':
                 unique_eids = list(df_trials['session'].unique())
                 num_1 += 1
 
+                mouse_name_from_path = mouse_identifier(pqt_file)
+                if pqt_file not in mice_pqt_files[mouse_name_from_path]:
+                    mice_pqt_files[mouse_name_from_path].append(pqt_file)
+
                 for i, eid_ONE in enumerate(unique_eids):
                     session_trials = df_trials[df_trials['session'] == unique_eids[i]]
                     # below code is because sometimes there is not any probabilityLeft
@@ -48,22 +54,32 @@ if __name__ == '__main__':
                         probability_stim = []
                         ii += 1
                         continue
-                    assess_values = np.unique(probability_stim) == np.array([0.2, 0.5, 0.8])
 
-                    if isinstance(assess_values, np.ndarray):  # Check if the comparison is an array
-                        # update def of comparison to single True/False
-                        assess_values = assess_values.all()
-                    if assess_values == True:
+                    unique_probs = np.unique(probability_stim)
+                    # Drop NaNs if present
+                    unique_probs = unique_probs[~np.isnan(unique_probs)] if hasattr(unique_probs, "dtype") else unique_probs
+                    assess_values = (
+                        len(unique_probs) == 3
+                        and np.allclose(np.sort(unique_probs.astype(float)), np.array([0.2, 0.5, 0.8]))
+                    )
+
+                    if assess_values:
                         num_3 += 1
-                        mouse_name = mouse_identifier(pqt_file)
+                        mouse_name = mouse_name_from_path
                         if mouse_name not in mice_names:
                             num_2 += 1
                             mice_names.append(mouse_name)
                         mice_session_eids[mouse_name].append(eid_ONE)
 
-    json = json.dumps(mice_session_eids)
+    mice_session_eids_json = json.dumps(mice_session_eids)
     f = open(os.getcwd() + "/mice_session_eids.json", "w")
-    f.write(json)
+    f.write(mice_session_eids_json)
+    f.close()
+
+    # Also save mapping of mice -> parquet file(s) for downstream scripts
+    mice_pqt_files_json = json.dumps(mice_pqt_files)
+    f = open(os.getcwd() + "/mice_pqt_files.json", "w")
+    f.write(mice_pqt_files_json)
     f.close()
 
     np.savez(os.getcwd() + '/mice_names.npz', mice_names)

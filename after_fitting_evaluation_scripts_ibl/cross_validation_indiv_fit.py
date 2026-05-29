@@ -6,10 +6,17 @@ Find the best model after analyzing the results of individual fit
 
 import numpy as np
 import json
+import argparse
+from pathlib import Path
 from glm_hmm_utils import data_for_cross_validation, get_mouse_info, mice_names_info, load_fold_session_map, log_likelihood_base_for_test, log_likelihood_for_test_glm, \
     cross_valid_bpt_compute, glmhmm_normalized_loglikelihood
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Cross-validate individual GLM-HMM fits (CV bits/trial).")
+    parser.add_argument("--animal", type=str, default=None,
+                        help="Optional single animal name (e.g., DY_011). If omitted, runs all animals.")
+    args = parser.parse_args()
+
     transition_alphas = [2.0]
     # prior_sigmas = [0.25, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0]
     prior_sigmas = [4.0]
@@ -18,18 +25,19 @@ if __name__ == '__main__':
 
     for transition_alpha in transition_alphas:
         for prior_sigma in prior_sigmas:
-            path_data = '../../glm-hmm_package/data/ibl/Della_cluster_data/separate_mouse_data/'
-            path_main_folder = '../../glm-hmm_package/results/model_indiv_ibl/num_regress_obs_' + str(
-                num_inputs) + '/' + '/prior_sigma_' + str(prior_sigma) + '_transition_alpha_' + str(
-                transition_alpha) + '/'
+            repo_root = Path(__file__).resolve().parent.parent
+            path_data = str(repo_root / 'data' / 'ibl' / 'Della_cluster_data' / 'separate_mouse_data') + '/'
+            path_main_folder = str(repo_root / 'results' / 'model_indiv_ibl' / f'num_regress_obs_{num_inputs}' /
+                                   f'prior_sigma_{prior_sigma}_transition_alpha_{transition_alpha}') + '/'
 
             mice_names = mice_names_info(path_data + 'mice_names.npz')
+            if args.animal is not None:
+                mice_names = [args.animal]
+
             for animal in mice_names:
                 if animal != "churchlandlab_IBL_1_trials.pqt":
                     path_analysis_glm_hmm = path_main_folder + animal + '/'
-                    path_analysis = '../../glm-hmm_package/results/model_indiv_ibl/' + 'num_regress_obs_' + \
-                                  str(num_inputs) + '/prior_sigma_' + str(prior_sigma) + '_transition_alpha_' + str(
-                        transition_alpha) + '/' + animal + '/'
+                    path_analysis = path_analysis_glm_hmm
                     fold_mapping_session = load_fold_session_map(path_data + animal + '_fold_session_map.npz')
 
                     # Parameters
@@ -101,7 +109,8 @@ if __name__ == '__main__':
                                                                                                            C,
                                                                                                            path_analysis_glm_hmm)
                                     keys = '/glmhmm_#state=' + str(K) + '/fld_num=' + str(fold)
-                                    optimal_initialize_dict[keys] = int(train_for_arranging_initials[0])
+                                    if len(train_for_arranging_initials) > 0:
+                                        optimal_initialize_dict[keys] = int(train_for_arranging_initials[0])
 
                     # Save best initialization directories across animals, folds and models (only GLM-HMM):
                     json_dump = json.dumps(optimal_initialize_dict)
